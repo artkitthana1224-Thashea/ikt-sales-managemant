@@ -1,0 +1,1096 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sales Master CRM - ใบเสนอราคา (Quotations Management)</title>
+
+  <!-- Google Font: Source Sans Pro & Kanit (Thailand UI support) -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&family=Source+Sans+3:wght@300;400;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Bootstrap 5 CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+  <!-- AdminLTE 4 CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@4.0.0-beta2/dist/css/adminlte.min.css">
+  
+  <!-- Custom Application Override CSS -->
+  <link rel="stylesheet" href="/style.css">
+
+  <style>
+    /* Styling for printable official layout */
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+      #print-area, #print-area * {
+        visibility: visible;
+      }
+      #print-area {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        padding: 20px;
+        background: #fff !important;
+        color: #000 !important;
+      }
+      .no-print {
+        display: none !important;
+      }
+    }
+    
+    .official-document {
+      font-family: 'Kanit', 'Source Sans 3', sans-serif;
+      border: 2px solid #555;
+      padding: 30px;
+      border-radius: 4px;
+      background-color: #fff;
+      color: #333;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    }
+    
+    .official-header {
+      border-bottom: 2px solid #333;
+      padding-bottom: 15px;
+      margin-bottom: 20px;
+    }
+
+    .doc-logo {
+      font-size: 1.8rem;
+      font-weight: 800;
+      letter-spacing: -1px;
+      color: #0d6efd;
+    }
+  </style>
+</head>
+<body class="layout-fixed sidebar-expand-lg bg-body-tertiary">
+
+  <div class="app-wrapper wrapper">
+    <!-- Navbar & Sidebar Injected via app.js -->
+
+    <!-- Main Content Stage Area -->
+    <main class="app-main p-3" style="min-height: 100vh; margin-left: 250px;">
+      <!-- Content Header -->
+      <div class="container-fluid mb-3 pt-2">
+        <div class="row align-items-center">
+          <div class="col-sm-6">
+            <h1 class="m-0 fw-bold tracking-tight text-dark fs-2 text-uppercase">
+              <i class="fas fa-file-invoice text-primary"></i> ใบเสนอราคา (Quotations)
+            </h1>
+            <p class="text-muted small m-0">บริหารจัดการตรวจสอบ ปรับปรุงแก้ไข และพิมพ์ใบเสนอราคาแก่ลูกค้า พร้อมระบบรันเลขเอกสารอัตโนมัติอ้างอิงปี และระบบ Revision Tracker (R1, R2...)</p>
+          </div>
+          <div class="col-sm-6 text-sm-end mt-2 mt-sm-0">
+            <div class="btn-group shadow-sm">
+              <button class="btn btn-outline-secondary btn-sm" onclick="exportTableToExcel('quotation-table', 'Quotations_Master_Report')">
+                <i class="fa fa-file-excel text-success me-1"></i>ส่งออก Excel
+              </button>
+              <button class="btn btn-outline-secondary btn-sm" onclick="exportTableToPDF('quotation-table', 'QUOTATIONS MASTER REPORT')">
+                <i class="fa fa-file-pdf text-danger me-1"></i>ส่งออก PDF
+              </button>
+              <button class="btn btn-primary btn-sm" onclick="openCreateQuotationModal()">
+                <i class="fa fa-plus-circle me-1"></i>สร้างใบเสนอราคาใหม่
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Stages Content Area -->
+      <div class="container-fluid">
+        <!-- Quick Status Filter Row -->
+        <div class="row g-2 mb-3">
+          <div class="col-12">
+            <div class="bg-white p-2 rounded shadow-sm border border-light-subtle d-flex flex-wrap gap-1.5 align-items-center justify-content-between">
+              <div class="d-flex flex-wrap gap-1 align-items-center" id="quote-status-filters">
+                <span class="small fw-bold text-muted me-2 ms-1"><i class="fa fa-filter"></i> ตัวกรองด่วน:</span>
+                <button class="btn btn-sm btn-primary active q-status-pill px-2.5 py-1" data-status="ALL">ทั้งหมด</button>
+                <button class="btn btn-sm btn-outline-secondary q-status-pill px-2.5 py-1" data-status="Draft">Draft (ร่าง)</button>
+                <button class="btn btn-sm btn-outline-secondary q-status-pill px-2.5 py-1" data-status="Sent">Sent (ส่งให้ลูกค้าแล้ว)</button>
+                <button class="btn btn-sm btn-outline-secondary q-status-pill px-2.5 py-1" data-status="Approved">Approved (อนุมัติ)</button>
+                <button class="btn btn-sm btn-outline-secondary q-status-pill px-2.5 py-1" data-status="Rejected">Rejected</button>
+                <button class="btn btn-sm btn-outline-secondary q-status-pill px-2.5 py-1" data-status="Invoiced">Invoiced (ออกใบแจ้งหนี้แล้ว)</button>
+                <button class="btn btn-sm btn-outline-secondary q-status-pill px-2.5 py-1" data-status="Cancelled">Cancelled</button>
+              </div>
+              <span class="badge bg-info-subtle text-info border font-monospace small px-2 py-1">Rule: YY Suffix & Rev Info Active</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Search and filters -->
+        <div class="card shadow-sm border-0 mb-3">
+          <div class="card-body p-3">
+            <div class="row g-2">
+              <div class="col-12 col-md-4">
+                <div class="input-group">
+                  <span class="input-group-text bg-light text-muted"><i class="fa fa-search"></i></span>
+                  <input type="text" class="form-control" id="quote-search-input" placeholder="ค้นหาเลขที่ใบเสนอราคา, ชื่องาน, ลูกค้า...">
+                </div>
+              </div>
+              <div class="col-12 col-md-3">
+                <select class="form-select" id="quote-filter-customer">
+                  <option value="">-- กรองลูกค้าทั้งหมด / All Customers --</option>
+                </select>
+              </div>
+              <div class="col-12 col-md-5 d-flex align-items-center text-muted small px-3">
+                <i class="fa fa-info-circle text-primary me-2"></i> 
+                <span>เลขที่ใบเสนอราคาจะ<strong>รันอัตโนมัติ (เช่น QT-XXXX-26)</strong> อิงปีตามวันเสนอราคา หากกดแก้ไขและบันทึกจะกลายเป็นเวอร์ชัน <strong>-R1, -R2...</strong> อัตโนมัติ</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quotations Table -->
+        <div class="card shadow-sm border-0">
+          <div class="card-header bg-white border-bottom py-3">
+            <h5 class="m-0 fw-bold"><i class="fas fa-file-invoice-dollar text-primary"></i> รายการใบเสนอราคาที่ลงทะเบียนในระบบ</h5>
+          </div>
+          <div class="card-body p-0">
+            <div class="table-responsive">
+              <table class="google-sheet-table table-hover align-middle mb-0" id="quotation-table">
+                <thead class="table-light text-uppercase small font-bold">
+                  <tr>
+                    <th>เลขที่เอกสาร</th>
+                    <th>โครงการ / ชื่องาน</th>
+                    <th>ลูกค้า</th>
+                    <th>วันที่เสนอราคา</th>
+                    <th class="text-end">มูลค่างานรวม (฿)</th>
+                    <th class="text-end">รวมสุทธิ (฿)</th>
+                    <th>ผู้เสนอราคา</th>
+                    <th class="text-center">สถานะ</th>
+                    <th class="text-center" style="width: 250px;">การจัดการ / ออกใบงาน</th>
+                  </tr>
+                </thead>
+                <tbody id="quotation-table-body">
+                  <tr>
+                    <td colspan="9" class="text-center py-5">
+                      <div class="spinner-border text-primary" role="status"></div>
+                      <p class="mt-2 text-muted">กำลังดึงรายการใบเสนอราคา...</p>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="app-footer text-center bg-white border-top py-3 text-muted small no-print mt-auto" style="margin-left: 250px;">
+      <div class="float-end d-none d-sm-inline ms-3">IKM Testing ERP Module</div>
+      <strong>Copyright &copy; 2026 <a href="https://ai.studio/build" class="text-decoration-none">AI Studio CRM</a>.</strong> สงวนลิขสิทธิ์
+    </footer>
+  </div>
+
+  <!-- MODAL: ADD / EDIT QUOTATION -->
+  <div class="modal fade" id="quotationModal" data-bs-backdrop="static" tabindex="-1" aria-labelledby="quotationModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+      <div class="modal-content">
+        <form id="quotationForm" onsubmit="saveQuotation(event)">
+          <div class="modal-header bg-primary text-white">
+            <h5 class="modal-title" id="quotationModalLabel"><i class="fa fa-file-invoice"></i> บันทึกใบเสนอราคา</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body p-4">
+            <!-- Hidden inputs -->
+            <input type="hidden" id="quote-id">
+            <input type="hidden" id="edit-mode-flag" value="false">
+
+            <div class="row g-3">
+              <!-- Header info -->
+              <div class="col-12 col-md-6">
+                <label class="form-label small fw-bold">ชื่อนิติบุคคลลูกค้า / Customer Master <span class="text-danger">*</span></label>
+                <select class="form-select" id="form-customer-id" required>
+                  <option value="">-- เลือกและค้นหารายชื่อลูกค้า --</option>
+                </select>
+              </div>
+              <div class="col-12 col-md-6">
+                <label class="form-label small fw-bold">เชื่อมกับโอกาสขาย / Opportunity Link (ทางเลือก)</label>
+                <select class="form-select" id="form-opportunity-id">
+                  <option value="">-- ไม่เชื่อมโยง (Standalone) --</option>
+                </select>
+              </div>
+
+              <div class="col-12 col-md-4">
+                <label class="form-label small fw-bold">ชื่องาน / หัวข้อเสนอราคา (Subject/Project Name) <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="form-title" placeholder="พิมพ์ชื่อโครงการ/รายละเอียดงานด่วน" required>
+              </div>
+              <div class="col-12 col-md-4">
+                <label class="form-label small fw-bold">วันที่เอกสาร / Quotation Date <span class="text-danger">*</span></label>
+                <input type="date" class="form-control" id="form-date" required>
+              </div>
+              <div class="col-12 col-md-4">
+                <label class="form-label small fw-bold">ระยะเวลาให้บริการรวม (วัน)</label>
+                <input type="number" class="form-control" id="form-validity" value="30" placeholder="จำนวนวันที่ราคาเป็นผล">
+              </div>
+
+              <div class="col-12 col-md-4">
+                <label class="form-label small fw-bold">เงื่อนไขการชำระเงิน (Payment Term)</label>
+                <input type="text" class="form-control" id="form-payment" value="30 Days" placeholder="เช่น 30 วัน, COD, มัดจำ">
+              </div>
+              <div class="col-12 col-md-4">
+                <label class="form-label small fw-bold">พนักงานผู้เสนอราคา (Sales Rep)</label>
+                <input type="text" class="form-control" id="form-sales-person" value="ดลภัทร (Admin)">
+              </div>
+              <div class="col-12 col-md-4">
+                <label class="form-label small fw-bold">สถานะของใบเสนอราคา</label>
+                <select class="form-select" id="form-status">
+                  <option value="Draft">Draft (ร่างใบเสนอราคา)</option>
+                  <option value="Sent">Sent (จัดส่งลูกค้า)</option>
+                  <option value="Approved">Approved (ลูกค้าตกลงซื้อ)</option>
+                  <option value="Rejected">Rejected (ไม่ผ่านงบประมาณ)</option>
+                  <option value="Invoiced">Invoiced (เปิดแจ้งหนี้แล้ว)</option>
+                  <option value="Cancelled">Cancelled (ยกเลิกงาน)</option>
+                </select>
+              </div>
+
+              <!-- Item section structured like Image 2 -->
+              <div class="col-12 mt-4">
+                <div class="border p-3 rounded" style="background-color: #fcfcfc;">
+                  <div class="d-flex align-items-center justify-content-between mb-3 border-bottom pb-2">
+                    <h6 class="m-0 fw-bold text-dark"><i class="fa fa-list"></i> รายละเอียดรายการอุปกรณ์ & บริการ (Document Items Line)</h6>
+                    <button type="button" class="btn btn-xs btn-outline-success" onclick="addNewItemRow()">
+                      <i class="fa fa-plus-circle me-1"></i>เพิ่มแถวรายการ
+                    </button>
+                  </div>
+                  
+                  <div class="table-responsive">
+                    <table class="table table-bordered table-sm align-middle" id="items-table" style="min-width: 900px;">
+                      <thead class="table-light header-items small text-center fw-bold">
+                        <tr>
+                          <th style="width: 50px;">ITEM</th>
+                          <th>คำอธิบายบริการ / DESCRIPTION</th>
+                          <th style="width: 100px;">QTY</th>
+                          <th style="width: 100px;">UNIT</th>
+                          <th style="width: 130px;">DURATION DAYS</th>
+                          <th style="width: 150px;">UNIT RATE PER DAY (฿)</th>
+                          <th style="width: 150px;">TOTAL PRICE (฿)</th>
+                          <th style="width: 50px;" class="text-center">#</th>
+                        </tr>
+                      </thead>
+                      <tbody id="items-table-body">
+                        <!-- Instantiated via Javascript -->
+                      </tbody>
+                    </table>
+                  </div>
+
+                  <!-- Total Calculations -->
+                  <div class="row mt-3 justify-content-end">
+                    <div class="col-12 col-md-5">
+                      <table class="table table-sm table-borderless font-monospace text-end">
+                        <tr>
+                          <td>มูลค่ารวมก่อนภาษี (Subtotal):</td>
+                          <td style="width: 150px;"><span id="calc-subtotal">0.00</span> ฿</td>
+                        </tr>
+                        <tr>
+                          <td>ภาษีมูลค่าเพิ่ม (VAT 7%):</td>
+                          <td><span id="calc-tax">0.00</span> ฿</td>
+                        </tr>
+                        <tr class="fw-bold border-top" style="font-size: 1.1rem; color: #0d6efd;">
+                          <td>ยอดรวมสุทธิ (Grand Total):</td>
+                          <td><span id="calc-grandtotal">0.00</span> ฿</td>
+                        </tr>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-12 mt-3">
+                <label class="form-label small fw-bold">ข้อความแนบท้าย & เงื่อนไขพิเศษ (Terms and Conditions)</label>
+                <textarea class="form-control" id="form-terms" rows="3" placeholder="ระบุเงื่อนไขการส่งมอบงาน การรับประกัน หรือข้อมูลการเบิกรับสัญญาย่อย"></textarea>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer bg-light">
+            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">ยกเลิก</button>
+            <button type="submit" class="btn btn-primary"><i class="fa fa-save me-1"></i> บันทึกข้อมูลใบเสนอราคา</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: OFFICIAL VIEW / PRINT TEMPLATE (HTML official rendering based on Image 1 & 2) -->
+  <div class="modal fade" id="printViewModal" tabindex="-1" aria-labelledby="printViewModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+      <div class="modal-content">
+        <div class="modal-header d-print-none">
+          <h5 class="modal-title fw-bold" id="printViewModalLabel"><i class="fa fa-print"></i> พิมพ์เอกสารแสดงผลตามรูปหลัก (Official Layout Sheet)</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body bg-light text-center p-4">
+          <div class="d-print-none mb-3">
+            <button class="btn btn-success px-4 font-bold" onclick="window.print()">
+              <i class="fa fa-print me-1"></i>ส่งออกหน้าต่าง Print เบราว์เซอร์ (กระดาษ A4)
+            </button>
+            <button class="btn btn-outline-secondary ms-2" data-bs-dismiss="modal">ปิดหน้าจอ</button>
+          </div>
+
+          <!-- Printable Area matching physical invoice rules -->
+          <div class="text-start mx-auto shadow bg-white" id="print-area" style="max-width: 900px; min-height: 1100px;">
+            <div class="official-document">
+              <div class="official-header">
+                <div class="row align-items-center">
+                  <div class="col-8">
+                    <div class="doc-logo text-uppercase"><i class="fa fa-flask"></i> IKM Testing (Thailand) Co., Ltd.</div>
+                    <div class="text-muted small mt-1">
+                      1/3 นิคมอุตสาหกรรมบ่อวิน แขวงสุรศักดิ์ อำเภอศรีราชา จังหวัดชลบุรี 20110<br>
+                      โทรศัพท์: +66 (0) 38-111-222 โทรสาร: +66 (0) 38-111-223 อีเมล: info@ikmtesting.co.th
+                    </div>
+                  </div>
+                  <div class="col-4 text-end">
+                    <div class="badge bg-primary text-uppercase mb-2 px-3 py-1.5" style="font-size: 1rem;" id="print-doc-type">QUOTATION</div>
+                    <div class="mt-1 font-monospace text-dark fw-bold" style="font-size: 1.1rem;" id="print-doc-no">QT-0001-26</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Info details -->
+              <div class="row mb-4">
+                <div class="col-6">
+                  <div class="bg-light p-3 rounded h-100">
+                    <strong class="text-uppercase text-secondary" style="font-size: 0.8rem; letter-spacing: 0.5px;">CLIENT INFORMATION / ลูกค้า</strong>
+                    <h5 class="fw-bold text-dark mt-1 mb-2" id="print-customer-name">บริษัท ปตท. จำกัด (มหาชน)</h5>
+                    <div class="small text-muted" id="print-customer-details">
+                      ที่อยู่: 555 ถ.วิภาวดีรังสิต จตุจักร กรุงเทพฯ 10900<br>
+                      โทรศัพท์: 02-537-2000 | อีเมล: somchai.r@pttplc.com<br>
+                      เลขประจำตัวผู้เสียภาษี: 0107544000108
+                    </div>
+                  </div>
+                </div>
+                <div class="col-6">
+                  <div class="bg-light p-3 rounded h-100 font-monospace">
+                    <strong class="text-uppercase text-secondary" style="font-size: 0.8rem; letter-spacing: 0.5px;">DOCUMENT METADATA / รายละเอียด</strong>
+                    <table class="table table-sm table-borderless mb-0 mt-1 small">
+                      <tr>
+                        <td class="p-0 text-muted">ชื่องาน (Project):</td>
+                        <td class="p-0 fw-bold text-dark" id="print-title">Boiler Maintenance equipment rental</td>
+                      </tr>
+                      <tr>
+                        <td class="p-0 text-muted">วันที่เสนอราคา:</td>
+                        <td class="p-0 text-dark" id="print-date">16-Jun-2026</td>
+                      </tr>
+                      <tr>
+                        <td class="p-0 text-muted">ยืนราคา (Validity):</td>
+                        <td class="p-0 text-dark" id="print-validity">30 Days</td>
+                      </tr>
+                      <tr>
+                        <td class="p-0 text-muted">เครดิตเทอม:</td>
+                        <td class="p-0 text-dark" id="print-payment">30 Days</td>
+                      </tr>
+                      <tr>
+                        <td class="p-0 text-muted">ทีมฝ่ายขาย (Sales Rep):</td>
+                        <td class="p-0 text-dark" id="print-sales-person">ดลภัทร (Admin)</td>
+                      </tr>
+                    </table>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Main items rendering -->
+              <table class="table table-bordered align-middle small mb-4">
+                <thead class="table-dark text-center text-uppercase">
+                  <tr>
+                    <th style="width: 50px;">Item</th>
+                    <th>Description</th>
+                    <th style="width: 70px;">Qty</th>
+                    <th style="width: 70px;">Unit</th>
+                    <th style="width: 100px;">Duration (Days)</th>
+                    <th style="width: 140px;">Unit Rate (฿)</th>
+                    <th style="width: 140px;">Total (฿)</th>
+                  </tr>
+                </thead>
+                <tbody id="print-items-body">
+                  <!-- Rendered dynamically -->
+                </tbody>
+                <tfoot>
+                  <tr class="align-middle">
+                    <td colspan="5" rowspan="3" class="bg-light" style="vertical-align: top;">
+                      <div class="p-2">
+                        <strong class="d-block small text-muted text-uppercase">Terms & Conditions / ข้อกำหนดและเงื่อนไข</strong>
+                        <p class="small text-secondary m-0" style="white-space: pre-wrap; font-size: 11px;" id="print-terms">-</p>
+                      </div>
+                    </td>
+                    <td class="text-end font-bold bg-light">Subtotal:</td>
+                    <td class="text-end font-monospace bg-light"><span id="print-subtotal">0.00</span></td>
+                  </tr>
+                  <tr>
+                    <td class="text-end font-bold">VAT 7%:</td>
+                    <td class="text-end font-monospace"><span id="print-vat">0.00</span></td>
+                  </tr>
+                  <tr class="table-primary border-primary">
+                    <td class="text-end font-bold fw-bold text-primary">Grand Total:</td>
+                    <td class="text-end font-monospace fw-bold text-primary" style="font-size: 1.1rem;"><span id="print-grandtotal">0.00</span></td>
+                  </tr>
+                </tfoot>
+              </table>
+
+              <!-- Authorised signature panel -->
+              <div class="row pt-5 mt-5">
+                <div class="col-6 text-center">
+                  <div style="border-bottom: 1px dotted #777; width: 70%; margin: 0 auto; height: 50px;"></div>
+                  <span class="small d-block text-muted mt-2">ผู้ส่งงาน / ฝ่ายเสนอราคาสากล</span>
+                  <strong class="small text-dark" id="print-sales-sig">ดลภัทร (Admin)</strong>
+                </div>
+                <div class="col-6 text-center">
+                  <div style="border-bottom: 1px dotted #777; width: 70%; margin: 0 auto; height: 50px;"></div>
+                  <span class="small d-block text-muted mt-2">อนุมัติโดยผู้อ่านสิทธิ์รับใบสั่งซื้อ / ลูกค้า</span>
+                  <strong class="small text-dark">Authorized Signatory</strong>
+                </div>
+              </div>
+
+              <!-- Standard legal notice -->
+              <div class="text-center text-muted small mt-5 pt-5 border-top" style="font-size: 10px;">
+                คลาวด์มาสเตอร์ได้รับการส่งรหัสและซ้ำสิทธิอ้างอิง ระบบการค้าพึ่งพาเทคโนโลยี IKM Testing (Thailand).
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: ADD / CREATE INVOICE (Opened from Quotation action) -->
+  <div class="modal fade" id="invoiceCreateModal" tabindex="-1" aria-labelledby="invoiceCreateModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <form id="invoiceCreateForm" onsubmit="generateInvoiceSum(event)">
+          <div class="modal-header bg-success text-white">
+            <h5 class="modal-title font-bold" id="invoiceCreateModalLabel"><i class="fa fa-file-invoice-dollar"></i> แปลงสัญญาสังเคราะห์ใบแจ้งหนี้ (Convert Quote to Invoice)</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body p-4">
+            <input type="hidden" id="inv-source-quote-id">
+            
+            <div class="mb-3">
+              <label class="form-label small fw-bold">อ้างอิงใบเสนอราคาต้นทาง</label>
+              <input type="text" class="form-control" id="inv-source-quote-no" readonly>
+            </div>
+            <div class="mb-3">
+              <label class="form-label small fw-bold">เลขที่ใบสั่งซื้อลูกค้า / Reference PO (ถ้ามี)</label>
+              <input type="text" class="form-control" id="inv-po-ref" placeholder="เช่น PO007441/2026">
+            </div>
+            <div class="mb-3">
+              <label class="form-label small fw-bold">โครงการเพื่อพาดหัวใบแจ้งหนี้ / Project Description</label>
+              <input type="text" class="form-control" id="inv-project" placeholder="เช่น Provision of Rental Equipment..." required>
+            </div>
+            <div class="row g-2">
+              <div class="col-6">
+                <label class="form-label small fw-bold">วันที่ออกใบแจ้งหนี้</label>
+                <input type="date" class="form-control" id="inv-date" required>
+              </div>
+              <div class="col-6">
+                <label class="form-label small fw-bold">วันครบกำหนด (Due Date)</label>
+                <input type="date" class="form-control" id="inv-due" required>
+              </div>
+            </div>
+            <div class="mt-3">
+              <label class="form-label small fw-bold">พนักงานผู้ออกเอกสาร (Invoice Handler)</label>
+              <input type="text" class="form-control" id="inv-sales" value="ดลภัทร (Admin)">
+            </div>
+            <p class="text-success small mt-3 m-0"><i class="fa fa-info-circle"></i> ระบบจะคัดลอกรายละเอียดสินค้า line items และยอดคำนวณทั้งหมดจากใบเสนอราคา ไปตั้งหนี้เป็น <strong>INV-XXXX-26</strong> ทันที!</p>
+          </div>
+          <div class="modal-footer bg-light">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ยกเลิก</button>
+            <button type="submit" class="btn btn-success"><i class="fa fa-check-circle"></i> ยืนยันออกใบแจ้งหนี้ / Invoice</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- JS Dependencies -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/admin-lte@4.0.0-beta2/dist/js/adminlte.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
+
+  <!-- DB & Core Shell -->
+  <script src="/supabase.js"></script>
+  <script src="/app.js"></script>
+
+  <!-- Interactive Logic Script for Quotation Page inline -->
+  <script>
+    let rawCustomers = [];
+    let rawOpportunities = [];
+    let currentQuotations = [];
+    let itemIndexCounter = 0;
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      toggleGlobalLoader(true);
+      try {
+        await loadAllMasterData();
+        await renderQuotationsList();
+      } catch (err) {
+        console.error("Load quotations dashboard failed", err);
+        showToastAlert('การจัดส่งคลาวด์ล้มเหลว กำลังสิงกับโลคอล', 'warning');
+      } finally {
+        toggleGlobalLoader(false);
+      }
+
+      // Bind search input
+      document.getElementById('quote-search-input').addEventListener('input', filterAndDrawTable);
+      document.getElementById('quote-filter-customer').addEventListener('change', filterAndDrawTable);
+
+      // Auto-populate search from URL parameter if provided
+      const urlParams = new URLSearchParams(window.location.search);
+      const searchParam = urlParams.get('search');
+      if (searchParam) {
+        document.getElementById('quote-search-input').value = searchParam;
+        filterAndDrawTable();
+      }
+
+      // Bind pills
+      document.querySelectorAll('.q-status-pill').forEach(pill => {
+        pill.addEventListener('click', (e) => {
+          document.querySelectorAll('.q-status-pill').forEach(p => p.classList.remove('active', 'btn-primary'));
+          document.querySelectorAll('.q-status-pill').forEach(p => p.classList.add('btn-outline-secondary'));
+          
+          pill.classList.add('active', 'btn-primary');
+          pill.classList.remove('btn-outline-secondary');
+          filterAndDrawTable();
+        });
+      });
+    });
+
+    async function loadAllMasterData() {
+      rawCustomers = await SupabaseDB.getCustomers() || [];
+      rawOpportunities = await SupabaseDB.getOpportunities() || [];
+      
+      // Populate Customer Select in filters
+      const customerFilter = document.getElementById('quote-filter-customer');
+      const formCustomerSelect = document.getElementById('form-customer-id');
+      
+      customerFilter.innerHTML = '<option value="">-- กรองลูกค้าทั้งหมด / All Customers --</option>';
+      formCustomerSelect.innerHTML = '<option value="">-- เลือกและค้นหารายชื่อลูกค้า --</option>';
+
+      rawCustomers.forEach(cust => {
+        const option = `<option value="${cust.id}">${cust.customer_name} (${cust.customer_code})</option>`;
+        customerFilter.insertAdjacentHTML('beforeend', option);
+        formCustomerSelect.insertAdjacentHTML('beforeend', option);
+      });
+
+      // Populate Opportunity Select
+      const formOppSelect = document.getElementById('form-opportunity-id');
+      formOppSelect.innerHTML = '<option value="">-- ไม่เชื่อมโยง (Standalone) --</option>';
+      rawOpportunities.forEach(opp => {
+        const option = `<option value="${opp.id}">${opp.opportunity_no} - ${opp.project_name}</option>`;
+        formOppSelect.insertAdjacentHTML('beforeend', option);
+      });
+    }
+
+    async function renderQuotationsList() {
+      currentQuotations = await SupabaseDB.getQuotations() || [];
+      filterAndDrawTable();
+    }
+
+    function filterAndDrawTable() {
+      const searchVal = document.getElementById('quote-search-input').value.toLowerCase().trim();
+      const customerFilterVal = document.getElementById('quote-filter-customer').value;
+      
+      // Active Status Pill val
+      const activePill = document.querySelector('.q-status-pill.active');
+      const statusFilterVal = activePill ? activePill.getAttribute('data-status') : 'ALL';
+
+      const tbody = document.getElementById('quotation-table-body');
+      tbody.innerHTML = '';
+
+      const filtered = currentQuotations.filter(q => {
+        // Search matches
+        const matchesSearch = !searchVal || 
+          q.quotation_no.toLowerCase().includes(searchVal) || 
+          q.title.toLowerCase().includes(searchVal) || 
+          (q.customer && q.customer.customer_name.toLowerCase().includes(searchVal)) ||
+          q.sales_person.toLowerCase().includes(searchVal);
+
+        // Customer matches
+        const matchesCustomer = !customerFilterVal || q.customer_id === customerFilterVal;
+
+        // Status matches
+        const matchesStatus = statusFilterVal === 'ALL' || q.status === statusFilterVal;
+
+        return matchesSearch && matchesCustomer && matchesStatus;
+      });
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="9" class="text-center py-4 text-muted">
+              <i class="fa fa-folder-open fs-2 d-block mb-2"></i>
+              ไม่พบรายการจัดทำใบเสนอราคาตามตัวกรองที่ระบุ ณ ขณะนี้
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      filtered.forEach(q => {
+        // Format Currency
+        const fmtTotal = (q.total_value || 0).toLocaleString(undefined, { minimumFractionDigits: 2 });
+        const fmtGrand = (q.grand_total || 0).toLocaleString(undefined, { minimumFractionDigits: 2 });
+        
+        let statusBadge = '';
+        if (q.status === 'Draft') statusBadge = '<span class="badge-status badge-status-draft"><i class="fa fa-edit"></i> Draft</span>';
+        else if (q.status === 'Sent') statusBadge = '<span class="badge-status badge-status-submitted"><i class="fa fa-paper-plane"></i> Sent</span>';
+        else if (q.status === 'Approved') statusBadge = '<span class="badge-status badge-status-approved"><i class="fa fa-check"></i> Approved</span>';
+        else if (q.status === 'Rejected') statusBadge = '<span class="badge-status badge-status-rejected"><i class="fa fa-times"></i> Rejected</span>';
+        else if (q.status === 'Invoiced') statusBadge = '<span class="badge-status badge-status-ready"><i class="fa fa-file-invoice-dollar"></i> Invoiced</span>';
+        else statusBadge = `<span class="badge-status badge-status-draft">${q.status}</span>`;
+
+        const row = `
+          <tr>
+            <td class="font-bold font-monospace text-primary" style="font-size:0.95rem;">${q.quotation_no}</td>
+            <td>
+              <div class="fw-bold text-dark">${q.title}</div>
+              <div class="text-xs text-muted">อ้างอิงดีล: ${q.opportunity ? q.opportunity.opportunity_no : 'ยื่นเสนอแยก'}</div>
+            </td>
+            <td>
+              <div class="small fw-semibold">${q.customer ? q.customer.customer_name : 'ไม่ระบุลูกค้า'}</div>
+              <div class="text-xs text-muted font-monospace">${q.customer ? q.customer.customer_code : '-'}</div>
+            </td>
+            <td class="small">${q.quotation_date}</td>
+            <td class="text-end font-monospace fw-semibold">${fmtTotal}</td>
+            <td class="text-end font-monospace font-bold text-dark" style="font-size:1rem; font-weight:700;">${fmtGrand}</td>
+            <td class="small text-muted">${q.sales_person}</td>
+            <td class="text-center">${statusBadge}</td>
+            <td class="text-center">
+              <div class="btn-group btn-group-sm">
+                <button class="btn btn-outline-info" title="ดูเอกสารฉบับพิมพ์" onclick="openPrintModal('${q.id}')">
+                  <i class="fa fa-print"></i>
+                </button>
+                <button class="btn btn-outline-primary" title="แก้ไข / พัฒนาสัญญา" onclick="openEditQuotationModal('${q.id}')">
+                  <i class="fa fa-edit"></i>
+                </button>
+                <button class="btn btn-outline-danger" title="ลบเอกสาร" onclick="deleteQuotation('${q.id}')">
+                  <i class="fa fa-trash"></i>
+                </button>
+                ${q.status === 'Approved' ? `
+                  <button class="btn btn-success" title="แปลงเป็นใบแจ้งหนี้ (Invoice)" onclick="openConvertInvoiceModal('${q.id}')">
+                    <i class="fa fa-file-invoice-dollar"></i> ออก Invoice
+                  </button>
+                ` : ''}
+              </div>
+            </td>
+          </tr>
+        `;
+        tbody.insertAdjacentHTML('beforeend', row);
+      });
+    }
+
+    // Opens creation modal
+    function openCreateQuotationModal() {
+      document.getElementById('quotationForm').reset();
+      document.getElementById('quote-id').value = '';
+      document.getElementById('edit-mode-flag').value = 'false';
+      document.getElementById('quotationModalLabel').innerHTML = '<i class="fa fa-plus-circle text-success"></i> จัดทำใบเสนอราคาฉบับอัตโนมัติ (Create New Quotation)';
+      
+      document.getElementById('form-date').value = new Date().toISOString().slice(0, 10);
+      document.getElementById('items-table-body').innerHTML = '';
+      itemIndexCounter = 0;
+      
+      // Add initial item rows
+      addNewItemRow();
+      
+      const modal = new bootstrap.Modal(document.getElementById('quotationModal'));
+      modal.show();
+    }
+
+    // Opens edit modal
+    async function openEditQuotationModal(id) {
+      toggleGlobalLoader(true);
+      try {
+        const q = await SupabaseDB.getQuotationById(id);
+        if (!q) {
+          showToastAlert('ไม่พบข้อมูลเอกสารดังกล่าว', 'danger');
+          return;
+        }
+
+        document.getElementById('quote-id').value = q.id;
+        document.getElementById('edit-mode-flag').value = 'true';
+        document.getElementById('quotationModalLabel').innerHTML = `<i class="fa fa-edit text-warning"></i> ปรับปรุงราคา & ข้อมูลโครงการ <span class="font-monospace bg-dark text-white rounded px-1.5">${q.quotation_no}</span>`;
+
+        document.getElementById('form-customer-id').value = q.customer_id;
+        document.getElementById('form-opportunity-id').value = q.opportunity_id || '';
+        document.getElementById('form-title').value = q.title;
+        document.getElementById('form-date').value = q.quotation_date;
+        document.getElementById('form-validity').value = q.validity_days || 30;
+        document.getElementById('form-payment').value = q.payment_term || '30 Days';
+        document.getElementById('form-sales-person').value = q.sales_person;
+        document.getElementById('form-status').value = q.status;
+        document.getElementById('form-terms').value = q.terms_conditions || '';
+
+        // Populate items
+        const tbody = document.getElementById('items-table-body');
+        tbody.innerHTML = '';
+        itemIndexCounter = 0;
+
+        const items = q.items || [];
+        items.forEach(item => {
+          addNewItemRow(item);
+        });
+
+        if (items.length === 0) {
+          addNewItemRow();
+        }
+
+        recalculateTotals();
+
+        const modal = new bootstrap.Modal(document.getElementById('quotationModal'));
+        modal.show();
+      } catch (err) {
+        console.error("Failed loading quotation edit", err);
+      } finally {
+        toggleGlobalLoader(false);
+      }
+    }
+
+    // Add item rows
+    function addNewItemRow(item = null) {
+      itemIndexCounter++;
+      const tbody = document.getElementById('items-table-body');
+      
+      const qty = item ? item.qty : 1;
+      const unit = item ? item.unit : 'Set';
+      const desc = item ? item.description : '';
+      const dur = item ? item.duration : 1;
+      const rate = item ? item.unit_rate : 0;
+      const price = item ? item.total_price : 0;
+
+      const rowHtml = `
+        <tr class="item-calc-row" id="item-calc-tr-${itemIndexCounter}">
+          <td class="text-center fw-bold text-muted index-lbl">${itemIndexCounter}</td>
+          <td>
+            <input type="text" class="form-control form-control-sm item-desc" value="${desc}" placeholder="พิมพ์ขอบเขตงาน เช่น HP Water Jet Rental, Rigging Support..." required>
+          </td>
+          <td>
+            <input type="number" class="form-control form-control-sm text-center item-qty" value="${qty}" oninput="triggerLineCalculation(${itemIndexCounter})" required min="1">
+          </td>
+          <td>
+            <input type="text" class="form-control form-control-sm text-center item-unit" value="${unit}" placeholder="เช่น Set, Job, Team">
+          </td>
+          <td>
+            <input type="number" class="form-control form-control-sm text-center item-dur" value="${dur}" oninput="triggerLineCalculation(${itemIndexCounter})" required min="1">
+          </td>
+          <td>
+            <input type="number" class="form-control form-control-sm text-end item-rate" value="${rate}" step="0.01" oninput="triggerLineCalculation(${itemIndexCounter})" required>
+          </td>
+          <td>
+            <input type="number" class="form-control form-control-sm text-end item-total-price bg-light font-monospace" value="${price}" readonly>
+          </td>
+          <td class="text-center">
+            <button type="button" class="btn btn-sm btn-link text-danger p-0" onclick="removeItemRow(${itemIndexCounter})">
+              <i class="fa fa-minus-circle fs-5"></i>
+            </button>
+          </td>
+        </tr>
+      `;
+      tbody.insertAdjacentHTML('beforeend', rowHtml);
+      triggerLineCalculation(itemIndexCounter);
+    }
+
+    function removeItemRow(id) {
+      const row = document.getElementById(`item-calc-tr-${id}`);
+      if (row) {
+        row.remove();
+        reindexItemRows();
+        recalculateTotals();
+      }
+    }
+
+    function reindexItemRows() {
+      let counter = 1;
+      document.querySelectorAll('.item-calc-row').forEach(row => {
+        row.querySelector('.index-lbl').innerHTML = counter;
+        counter++;
+      });
+    }
+
+    // Trigger row level multiplication
+    function triggerLineCalculation(id) {
+      const row = document.getElementById(`item-calc-tr-${id}`);
+      if (!row) return;
+
+      const qty = parseFloat(row.querySelector('.item-qty').value) || 0;
+      const dur = parseFloat(row.querySelector('.item-dur').value) || 1;
+      const rate = parseFloat(row.querySelector('.item-rate').value) || 0;
+
+      const total = qty * dur * rate;
+      row.querySelector('.item-total-price').value = total.toFixed(2);
+
+      recalculateTotals();
+    }
+
+    // Sum overall tax values
+    function recalculateTotals() {
+      let subtotal = 0;
+      document.querySelectorAll('.item-calc-row').forEach(row => {
+        const total = parseFloat(row.querySelector('.item-total-price').value) || 0;
+        subtotal += total;
+      });
+
+      const vat = subtotal * 0.07;
+      const grand = subtotal + vat;
+
+      document.getElementById('calc-subtotal').innerHTML = subtotal.toLocaleString(undefined, { minimumFractionDigits: 2 });
+      document.getElementById('calc-tax').innerHTML = vat.toLocaleString(undefined, { minimumFractionDigits: 2 });
+      document.getElementById('calc-grandtotal').innerHTML = grand.toLocaleString(undefined, { minimumFractionDigits: 2 });
+    }
+
+    // Saving and updating quotations
+    async function saveQuotation(event) {
+      event.preventDefault();
+      toggleGlobalLoader(true);
+
+      const id = document.getElementById('quote-id').value;
+      const isEdit = document.getElementById('edit-mode-flag').value === 'true';
+
+      const customerId = document.getElementById('form-customer-id').value;
+      const opportunityId = document.getElementById('form-opportunity-id').value;
+      const title = document.getElementById('form-title').value;
+      const date = document.getElementById('form-date').value;
+      const validity = parseInt(document.getElementById('form-validity').value) || 30;
+      const payment = document.getElementById('form-payment').value;
+      const sales = document.getElementById('form-sales-person').value;
+      const status = document.getElementById('form-status').value;
+      const terms = document.getElementById('form-terms').value;
+
+      // Extract line items
+      const items = [];
+      document.querySelectorAll('.item-calc-row').forEach((row, idx) => {
+        items.push({
+          item_no: idx + 1,
+          description: row.querySelector('.item-desc').value,
+          qty: parseFloat(row.querySelector('.item-qty').value) || 1,
+          unit: row.querySelector('.item-unit').value || 'Set',
+          duration: parseFloat(row.querySelector('.item-dur').value) || 1,
+          unit_rate: parseFloat(row.querySelector('.item-rate').value) || 0,
+          total_price: parseFloat(row.querySelector('.item-total-price').value) || 0
+        });
+      });
+
+      const total_value = items.reduce((sum, item) => sum + item.total_price, 0);
+      const tax_rate = 7;
+      const grand_total = total_value * 1.07;
+
+      const payload = {
+        customer_id: customerId,
+        opportunity_id: opportunityId || null,
+        title: title,
+        quotation_date: date,
+        validity_days: validity,
+        payment_term: payment,
+        sales_person: sales,
+        status: status,
+        terms_conditions: terms,
+        items: items,
+        total_value: total_value,
+        tax_rate: tax_rate,
+        grand_total: grand_total
+      };
+
+      try {
+        if (isEdit && id) {
+          // Explicit requirement update will append -R1 suffix or increment it
+          const res = await SupabaseDB.updateQuotation(id, payload, true);
+          showToastAlert(`บันทึกการแก้ไขปรับปรุงราคาเป็นใบเสนอราคาฉบับที่ ${res.quotation_no} สำเร็จ!`, 'success');
+          await SupabaseDB.addActivity('Update', 'Quotation', id, `Updated Quotation to revision ${res.quotation_no}`);
+        } else {
+          // Normal sequential creation Autonumber
+          const res = await SupabaseDB.addQuotation(payload);
+          showToastAlert(`จัดทำรหัสระบบใบเสนอราคาลำดับสำเร็จ: ${res.quotation_no}`, 'success');
+          await SupabaseDB.addActivity('Create', 'Quotation', res.id, `Created Quotation ${res.quotation_no}`);
+        }
+
+        // Close modal and redraw
+        const myModalEl = document.getElementById('quotationModal');
+        const modal = bootstrap.Modal.getInstance(myModalEl);
+        modal.hide();
+
+        await renderQuotationsList();
+      } catch (err) {
+        console.error("Save quotation error", err);
+        showToastAlert('การส่งเอกสารพึ่งพาเซฟเวอร์ล้มเหลว', 'danger');
+      } finally {
+        toggleGlobalLoader(false);
+      }
+    }
+
+    // Delete Quotations
+    async function deleteQuotation(id) {
+      const q = await SupabaseDB.getQuotationById(id);
+      if (!q) return;
+
+      Swal.fire({
+        title: 'คุณยืนยันที่จะลบเอกสารเสนอราคา?',
+        text: `รหัสเอกสารใบเสนอราคา ${q.quotation_no} จะถูกถอดออกถาวร`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'ลบทันที!',
+        cancelButtonText: 'ยกเลิก'
+      }).then(async (result) => {
+        if (result.isConfirmed) {
+          toggleGlobalLoader(true);
+          try {
+            await SupabaseDB.deleteQuotation(id);
+            showToastAlert('ลบเอกสารสำเร็จ', 'success');
+            await SupabaseDB.addActivity('Delete', 'Quotation', id, `Deleted quotation reference ${q.quotation_no}`);
+            await renderQuotationsList();
+          } catch (err) {
+            console.error("Delete quotation failed", err);
+          } finally {
+            toggleGlobalLoader(false);
+          }
+        }
+      });
+    }
+
+    // Opens printing view modal
+    async function openPrintModal(id) {
+      toggleGlobalLoader(true);
+      try {
+        const q = await SupabaseDB.getQuotationById(id);
+        if (!q) return;
+
+        document.getElementById('print-doc-type').innerText = "QUOTATION / ใบเสนอราคา";
+        document.getElementById('print-doc-no').innerText = q.quotation_no;
+        document.getElementById('print-customer-name').innerText = q.customer ? q.customer.customer_name : 'ไม่พบเจอลูกค้า';
+        
+        let clientDetailsHtml = '';
+        if (q.customer) {
+          clientDetailsHtml = `
+            ที่อยู่: ${q.customer.address || '-'}<br>
+            โทรศัพท์: ${q.customer.phone || '-'}<br>
+            กิริยาเครดิต: ${q.validity_days || 30} วัน | เลขพิกัดแวต: ${q.customer.tax_id || '-'}<br>
+            อีเมล: ${q.customer.email || '-'}
+          `;
+        }
+        document.getElementById('print-customer-details').innerHTML = clientDetailsHtml;
+
+        document.getElementById('print-title').innerText = q.title;
+        document.getElementById('print-date').innerText = q.quotation_date;
+        document.getElementById('print-validity').innerText = `${q.validity_days || 30} Days`;
+        document.getElementById('print-payment').innerText = q.payment_term || '30 Days';
+        document.getElementById('print-sales-person').innerText = q.sales_person;
+        document.getElementById('print-sales-sig').innerText = q.sales_person;
+        document.getElementById('print-terms').innerText = q.terms_conditions || 'ไม่มีเงื่อนไขใด ๆ เพิ่มเติม';
+
+        // Bind print line items
+        const tbody = document.getElementById('print-items-body');
+        tbody.innerHTML = '';
+        
+        const items = q.items || [];
+        items.forEach((item, index) => {
+          const row = `
+            <tr class="align-middle">
+              <td class="text-center font-monospace">${index + 1}</td>
+              <td><strong>${item.description}</strong></td>
+              <td class="text-center font-monospace">${item.qty}</td>
+              <td class="text-center">${item.unit}</td>
+              <td class="text-center font-monospace">${item.duration}</td>
+              <td class="text-end font-monospace">${(item.unit_rate || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
+              <td class="text-end font-monospace">${(item.total_price || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
+            </tr>
+          `;
+          tbody.insertAdjacentHTML('beforeend', row);
+        });
+
+        const sub = q.total_value || 0;
+        const vat = sub * 0.07;
+        const grand = q.grand_total || (sub + vat);
+
+        document.getElementById('print-subtotal').innerText = sub.toLocaleString(undefined, { minimumFractionDigits: 2 });
+        document.getElementById('print-vat').innerText = vat.toLocaleString(undefined, { minimumFractionDigits: 2 });
+        document.getElementById('print-grandtotal').innerText = grand.toLocaleString(undefined, { minimumFractionDigits: 2 });
+
+        const modal = new bootstrap.Modal(document.getElementById('printViewModal'));
+        modal.show();
+      } catch (err) {
+        console.error("Open Print Preview unsuccessful", err);
+      } finally {
+        toggleGlobalLoader(false);
+      }
+    }
+
+    // Opens convert to Invoice modal (from Approved Quotation)
+    async function openConvertInvoiceModal(id) {
+      const q = await SupabaseDB.getQuotationById(id);
+      if (!q) return;
+
+      document.getElementById('inv-source-quote-id').value = q.id;
+      document.getElementById('inv-source-quote-no').value = q.quotation_no;
+      document.getElementById('inv-project').value = `Provision of Rental Equipment and Manpower Services for ${q.title}`;
+      
+      document.getElementById('inv-date').value = new Date().toISOString().slice(0, 10);
+      
+      const dueObj = new Date();
+      dueObj.setDate(dueObj.getDate() + 30);
+      document.getElementById('inv-due').value = dueObj.toISOString().slice(0, 10);
+
+      const modal = new bootstrap.Modal(document.getElementById('invoiceCreateModal'));
+      modal.show();
+    }
+
+    // Generates Invoice actually inside crm_invoices
+    async function generateInvoiceSum(event) {
+      event.preventDefault();
+      toggleGlobalLoader(true);
+
+      const sourceId = document.getElementById('inv-source-quote-id').value;
+      const poRef = document.getElementById('inv-po-ref').value;
+      const project = document.getElementById('inv-project').value;
+      const invDate = document.getElementById('inv-date').value;
+      const dueDate = document.getElementById('inv-due').value;
+      const handlerStr = document.getElementById('inv-sales').value;
+
+      try {
+        const q = await SupabaseDB.getQuotationById(sourceId);
+        if (!q) return;
+
+        // Formulate invoice lines identical to Quotation
+        const invPayload = {
+          quotation_no: q.quotation_no,
+          customer_id: q.customer_id,
+          po_reference: poRef || `PO-${q.quotation_no.replace('QT-', '')}`,
+          project_name: project,
+          invoice_date: invDate,
+          due_date: dueDate,
+          status: 'Unpaid',
+          sales_person: handlerStr,
+          items: q.items,
+          total_value: q.total_value,
+          tax_rate: q.tax_rate,
+          grand_total: q.grand_total
+        };
+
+        const res = await SupabaseDB.addInvoice(invPayload);
+        
+        // Update quotation status to "Invoiced" to signify billing loop closing
+        await SupabaseDB.updateQuotation(sourceId, { status: 'Invoiced' });
+
+        await SupabaseDB.addActivity('Convert', 'Invoice', res.id, `Converted approved Quotation ${q.quotation_no} to Invoice ${res.invoice_no}`);
+
+        showToastAlert(`แปลงสัญญาสังเคราะห์ใบแจ้งหนี้เสร็จสมบูรณ์เรียบร้อย รหัสตั้งหนี้: ${res.invoice_no}`, 'success');
+
+        const modal = bootstrap.Modal.getInstance(document.getElementById('invoiceCreateModal'));
+        modal.hide();
+
+        setTimeout(() => {
+          window.location.href = 'invoices.html';
+        }, 1200);
+
+      } catch (err) {
+        console.error("Invoicing conversion failed", err);
+        showToastAlert('การสังเคราะห์และประทับหนี้ขัดข้อง', 'danger');
+      } finally {
+        toggleGlobalLoader(false);
+      }
+    }
+  </script>
+</body>
+</html>
