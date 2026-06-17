@@ -678,14 +678,8 @@ function updateDBLabel(isCloud) {
 
 // Loading Toggle Indicators
 function toggleGlobalLoader(show) {
-  const loader = document.getElementById('global-spinner');
-  if (loader) {
-    if (show) {
-      loader.classList.remove('hidden');
-    } else {
-      loader.classList.add('hidden');
-    }
-  }
+  // Disabled as per user request to not show blocking loader
+  return;
 }
 
 // Toast Notification manager

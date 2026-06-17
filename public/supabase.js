@@ -1,6 +1,43 @@
 // Supabase REST Client and Database Service
-const SUPABASE_URL = 'https://vrmjdbwdilqitdttzrcq.supabase.co/rest/v1';
+const SUPABASE_URL = 'https://vrmjdbwdilqitdttzrcq.supabase.co';
+const SUPABASE_REST_URL = SUPABASE_URL + '/rest/v1';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZybWpkYndkaWxxaXRkdHR6cmNxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1NzkzOTUsImV4cCI6MjA5NzE1NTM5NX0.1XPYA4LAyQOBL1WCKC-oIbsSLYcw3s5W9znimDXqmL4';
+
+// Dynamically load Supabase SDK for Realtime support
+(function loadSupabaseSDK() {
+  if (!document.getElementById('supabase-sdk')) {
+    const script = document.createElement('script');
+    script.id = 'supabase-sdk';
+    script.src = 'https://unpkg.com/@supabase/supabase-js@2';
+    script.onload = () => {
+      window.supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+      connectRealtimeDashboard();
+    };
+    document.head.appendChild(script);
+  }
+})();
+
+function connectRealtimeDashboard() {
+  if (!window.supabaseClient) return;
+  // Listen to customer updates
+  window.supabaseClient
+    .channel('public:customers')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'customers' }, payload => {
+      console.log('Realtime change received: customers!', payload);
+      if (typeof loadCustomerTable === 'function') loadCustomerTable();
+      if (typeof loadDashboardData === 'function') loadDashboardData();
+    })
+    .subscribe();
+
+  // Listen to opportunities updates
+  window.supabaseClient
+    .channel('public:opportunities')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'opportunities' }, payload => {
+      console.log('Realtime change received: opportunities!', payload);
+      if (typeof loadDashboardData === 'function') loadDashboardData();
+    })
+    .subscribe();
+}
 
 // Default initial data for simulation and seeding
 const DEFAULT_CUSTOMERS = [
@@ -520,7 +557,7 @@ async function restRequest(endpoint, options = {}) {
     ...options.headers,
   };
 
-  const response = await fetch(`${SUPABASE_URL}${endpoint}`, {
+  const response = await fetch(`${SUPABASE_REST_URL}${endpoint}`, {
     ...options,
     headers,
   });
