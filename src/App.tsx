@@ -118,7 +118,7 @@ export default function App() {
       const recs = await CRMService.fetchReceipts();
       setReceipts(recs);
     } catch (err) {
-      console.error('Failed loading data from standard adapters', err);
+      console.warn('Failed loading data from standard adapters', err);
       showToast('ไม่สามารถดึงข้อมูลจากโครงข่ายได้ ระบบใช้ข้อมูลสำรอง', 'err');
     } finally {
       setLoading(false);

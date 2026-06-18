@@ -1329,7 +1329,7 @@ export const CRMService = {
         LocalDB.saveCustomers(parsed);
         return parsed;
       } catch (err) {
-        console.error('Failed to parse remote customers, using offline data', err);
+        console.warn('Failed to parse remote customers, using offline data', err);
         return LocalDB.getCustomers();
       }
     } else {
@@ -1410,7 +1410,7 @@ export const CRMService = {
                   })
                 });
               } catch (contactErr) {
-                console.error('Failed to insert relative customer contact object', contact, contactErr);
+                console.warn('Failed to insert relative customer contact object', contact, contactErr);
               }
             }
           }
@@ -1501,7 +1501,7 @@ export const CRMService = {
               });
             }
           } catch (contactErr) {
-            console.error('Failed to update nested customer contacts table', contactErr);
+            console.warn('Failed to update nested customer contacts table', contactErr);
           }
         }
 
@@ -1589,7 +1589,7 @@ export const CRMService = {
         LocalDB.saveOpportunities(parsed);
         return parsed;
       } catch (err) {
-        console.error('Failed to load remote opportunities, using offline copy', err);
+        console.warn('Failed to load remote opportunities, using offline copy', err);
         // build offline projection with offline customers
         const localOpps = LocalDB.getOpportunities();
         const map = new Map(localCustomers.map(c => [c.id, c]));
@@ -1942,13 +1942,13 @@ export const CRMService = {
     const qDate = quote.issue_date || new Date().toISOString().slice(0, 10);
     const yr = qDate.split('-')[0].slice(-2); // e.g. "26"
 
-    let seq = 1;
+    let seq = 4001;
     if (list.length > 0) {
       const seqs = list.map(q => {
         const match = q.quotation_no.match(/^QT-(\d{4})-\d{2}/);
         return match ? parseInt(match[1], 10) : 0;
       });
-      seq = Math.max(...seqs, 0) + 1;
+      seq = Math.max(...seqs, 4000) + 1;
     }
     const nextCode = `QT-${String(seq).padStart(4, '0')}-${yr}`;
     const newId = crypto.randomUUID();

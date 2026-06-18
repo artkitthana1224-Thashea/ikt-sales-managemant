@@ -127,7 +127,7 @@ export default function QuotationView({
   const filteredQuotes = useMemo(() => {
     return quotations.filter(q => {
       const matchSearch = 
-        q.quotation_no.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (q.quotation_no + (q.revision_number ? `-R${String(q.revision_number).padStart(2, '0')}` : '')).toLowerCase().includes(searchTerm.toLowerCase()) ||
         q.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
         (q.customer_name && q.customer_name.toLowerCase().includes(searchTerm.toLowerCase()));
       const matchStatus = selectedStatus === 'All' || q.status === selectedStatus;
@@ -247,7 +247,7 @@ export default function QuotationView({
                       {idx + 1}
                     </td>
                     <td className="border border-slate-200 px-3 py-1.5 font-mono text-slate-600 truncate">
-                      {q.quotation_no}
+                      {q.quotation_no}{q.revision_number ? `-R${String(q.revision_number).padStart(2, '0')}` : ''}
                     </td>
                     <td className="border border-slate-200 px-3 py-1.5">
                       <span className="font-bold text-slate-800 block">{q.customer_name}</span>
@@ -511,7 +511,9 @@ export default function QuotationView({
                   <div className="text-[11px] bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-lg space-y-0.5 text-left inline-block min-w-[180px]">
                     <div className="flex justify-between">
                       <span className="text-slate-400 font-medium">Doc No.:</span>
-                      <span className="font-mono font-bold text-slate-800">{viewingQuote.quotation_no}</span>
+                      <span className="font-mono font-bold text-slate-800">
+                        {viewingQuote.quotation_no}{viewingQuote.revision_number ? `-R${String(viewingQuote.revision_number).padStart(2, '0')}` : ''}
+                      </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-slate-400 font-medium">Date:</span>

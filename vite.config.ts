@@ -15,6 +15,9 @@ export default defineConfig(() => {
       rollupOptions: {
         input: {
           main: path.resolve(__dirname, 'index.html'),
+          executive: path.resolve(__dirname, 'executive.html'),
+          enterpriseCustomers: path.resolve(__dirname, 'enterprise-customers.html'),
+          crmOpportunities: path.resolve(__dirname, 'crm-opportunities.html'),
           customers: path.resolve(__dirname, 'customers.html'),
           invoices: path.resolve(__dirname, 'invoices.html'),
           leads: path.resolve(__dirname, 'leads.html'),

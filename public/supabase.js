@@ -655,8 +655,8 @@ const SupabaseDB = {
         localStorage.setItem('crm_customers', JSON.stringify(map));
         return map;
       } catch (e) {
-        console.error("Fetch Cloud Customers failed. fallback to local", e);
-        return JSON.parse(localStorage.getItem('crm_customers'));
+        console.warn("Fetch Cloud Customers failed. fallback to local", e);
+        return JSON.parse(localStorage.getItem('crm_customers')) || [];
       }
     } else {
       const custs = JSON.parse(localStorage.getItem('crm_customers')) || [];
@@ -847,8 +847,8 @@ const SupabaseDB = {
         localStorage.setItem('crm_opportunities', JSON.stringify(hydrated));
         return hydrated;
       } catch (err) {
-        console.error("Fetch Cloud Opportunities failed. fallback to local", err);
-        return JSON.parse(localStorage.getItem('crm_opportunities'));
+        console.warn("Fetch Cloud Opportunities failed. fallback to local", err);
+        return JSON.parse(localStorage.getItem('crm_opportunities')) || [];
       }
     } else {
       const opps = JSON.parse(localStorage.getItem('crm_opportunities')) || [];
@@ -999,13 +999,13 @@ const SupabaseDB = {
     const qDate = quoteData.quotation_date || new Date().toISOString().slice(0, 10);
     const yr = qDate.split('-')[0].slice(-2); // e.g. "26"
 
-    let seq = 1;
+    let seq = 4001;
     if (quotes.length > 0) {
       const seqs = quotes.map(q => {
         const match = q.quotation_no.match(/^QT-(\d{4})-\d{2}/);
         return match ? parseInt(match[1], 10) : 0;
       });
-      seq = Math.max(...seqs, 0) + 1;
+      seq = Math.max(...seqs, 4000) + 1;
     }
     const nextCode = `QT-${String(seq).padStart(4, '0')}-${yr}`;
     const newId = crypto.randomUUID();
