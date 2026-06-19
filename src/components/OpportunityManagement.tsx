@@ -152,7 +152,7 @@ function OppDashboard({ opps, onNavigate }: any) {
         <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
            <h3 className="text-base font-bold text-slate-800 mb-4">Pipeline by Stage (Funnel)</h3>
            <div className="h-[300px]">
-             <ResponsiveContainer width="100%" height="100%">
+             <ResponsiveContainer width="100%" height="100%" minHeight={1} minWidth={1}>
                 <BarChart data={pipelineStageData.length ? pipelineStageData : mockPipelineStage} layout="vertical" margin={{top: 5, right: 30, left: 40, bottom: 5}}>
                   <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#E2E8F0"/>
                   <XAxis type="number" axisLine={false} tickLine={false} className="text-xs text-slate-500" />
@@ -171,7 +171,7 @@ function OppDashboard({ opps, onNavigate }: any) {
         <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
            <h3 className="text-base font-bold text-slate-800 mb-4">Opportunity Source Analysis</h3>
            <div className="h-[300px]">
-             <ResponsiveContainer width="100%" height="100%">
+             <ResponsiveContainer width="100%" height="100%" minHeight={1} minWidth={1}>
                <PieChart>
                  <Pie data={sourceData.length ? sourceData : mockSources} cx="50%" cy="50%" innerRadius={70} outerRadius={100} paddingAngle={2} dataKey="value">
                    {(sourceData.length ? sourceData : mockSources).map((entry, index) => ( <Cell key={`cell-${index}`} fill={entry.color} /> ))}
@@ -355,7 +355,7 @@ function OppForecast({ opps }: any) {
           <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
              <h3 className="text-base font-bold text-slate-800 mb-4">Monthly Closing Forecast</h3>
              <div className="h-[300px]">
-               <ResponsiveContainer width="100%" height="100%">
+               <ResponsiveContainer width="100%" height="100%" minHeight={1} minWidth={1}>
                  <LineChart data={mockForecast}>
                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0"/>
                    <XAxis dataKey="month" axisLine={false} tickLine={false} className="text-xs text-slate-500" />
@@ -372,7 +372,7 @@ function OppForecast({ opps }: any) {
           <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
              <h3 className="text-base font-bold text-slate-800 mb-4">Pipeline Trend vs Target</h3>
              <div className="h-[300px]">
-               <ResponsiveContainer width="100%" height="100%">
+               <ResponsiveContainer width="100%" height="100%" minHeight={1} minWidth={1}>
                  <AreaChart data={mockForecast}>
                    <defs>
                       <linearGradient id="colorTarget" x1="0" y1="0" x2="0" y2="1">

@@ -85,6 +85,7 @@ CREATE TABLE IF NOT EXISTS public.quotations (
     tax_rate NUMERIC(5, 2) DEFAULT 7.00,
     grand_total NUMERIC(15, 2) DEFAULT 0.00,
     terms_conditions TEXT,
+    remarks TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -153,3 +154,8 @@ INSERT INTO public.invoices (id, invoice_no, quotation_no, customer_id, project_
 VALUES 
 ('i1ef4942-83b3-4f9e-bbb4-7a0df47ac001', 'INV-0001-26', 'QT-0001-26', 'c1ef4942-83b3-4f9e-bbb4-7a0df47a0001', 'Tank Storage Inspection Service Ph1', '2026-06-17', '2026-07-17', 'Unpaid', 500000.00, 7.00, 535000.00)
 ON CONFLICT (invoice_no) DO NOTHING;
+
+-- Reload Supabase Schema Cache
+ALTER TABLE public.quotations ADD COLUMN IF NOT EXISTS remarks TEXT;
+ALTER TABLE public.quotations ADD COLUMN IF NOT EXISTS revision_number INT DEFAULT 0;
+NOTIFY pgrst, 'reload schema';

@@ -127,7 +127,7 @@ export default function QuotationView({
   const filteredQuotes = useMemo(() => {
     return quotations.filter(q => {
       const matchSearch = 
-        (q.quotation_no + (q.revision_number ? `-R${String(q.revision_number).padStart(2, '0')}` : '')).toLowerCase().includes(searchTerm.toLowerCase()) ||
+        q.quotation_no.toLowerCase().includes(searchTerm.toLowerCase()) ||
         q.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
         (q.customer_name && q.customer_name.toLowerCase().includes(searchTerm.toLowerCase()));
       const matchStatus = selectedStatus === 'All' || q.status === selectedStatus;
@@ -247,7 +247,7 @@ export default function QuotationView({
                       {idx + 1}
                     </td>
                     <td className="border border-slate-200 px-3 py-1.5 font-mono text-slate-600 truncate">
-                      {q.quotation_no}{q.revision_number ? `-R${String(q.revision_number).padStart(2, '0')}` : ''}
+                      {q.quotation_no}
                     </td>
                     <td className="border border-slate-200 px-3 py-1.5">
                       <span className="font-bold text-slate-800 block">{q.customer_name}</span>
@@ -492,10 +492,7 @@ export default function QuotationView({
               {/* Document Banner */}
               <div className="flex justify-between items-start border-b-2 border-rose-600 pb-5">
                 <div className="flex gap-4">
-                  <div className="w-16 h-16 bg-red-600 text-white rounded-md flex flex-col items-center justify-center font-black text-2xl tracking-tighter shadow-sm leading-none">
-                    <span>IKM</span>
-                    <span className="text-[9px] font-bold tracking-widest mt-0.5">GROUP</span>
-                  </div>
+                  <img src="https://drive.google.com/uc?export=view&id=1u2v-GT6YDaWZZoravixstbtyQkvudkbw" alt="IKM Logo" className="h-16 w-auto object-contain shrink-0" referrerPolicy="no-referrer" />
                   <div>
                     <h1 className="text-slate-950 font-black text-lg uppercase tracking-wider leading-none">IKM Testing (Thailand) Co., Ltd.</h1>
                     <span className="text-[10px] text-slate-500 block mt-1 leading-relaxed">
@@ -511,9 +508,7 @@ export default function QuotationView({
                   <div className="text-[11px] bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-lg space-y-0.5 text-left inline-block min-w-[180px]">
                     <div className="flex justify-between">
                       <span className="text-slate-400 font-medium">Doc No.:</span>
-                      <span className="font-mono font-bold text-slate-800">
-                        {viewingQuote.quotation_no}{viewingQuote.revision_number ? `-R${String(viewingQuote.revision_number).padStart(2, '0')}` : ''}
-                      </span>
+                      <span className="font-mono font-bold text-slate-800">{viewingQuote.quotation_no}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-slate-400 font-medium">Date:</span>

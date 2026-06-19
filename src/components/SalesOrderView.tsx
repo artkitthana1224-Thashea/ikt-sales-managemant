@@ -334,7 +334,7 @@ export default function SalesOrderView({
                 >
                   <option value="">-- เลือกอ้างอิงใบเสนอราคาคู่ชำระ --</option>
                   {validQuotations.map(q => (
-                    <option key={q.id} value={q.id}>{q.quotation_no}{q.revision_number ? `-R${String(q.revision_number).padStart(2, '0')}` : ''} - {q.subject}</option>
+                    <option key={q.id} value={q.id}>{q.quotation_no} - {q.subject}</option>
                   ))}
                 </select>
               </div>
@@ -484,13 +484,7 @@ export default function SalesOrderView({
                   <div className="text-[11px] font-bold text-slate-400">เลขที่ใบสั่งขาย / SO Identifier</div>
                   <div className="font-mono text-base font-extrabold text-slate-800">{viewingSO.so_no}</div>
                   <div className="text-[11px] font-bold text-slate-400 pt-2">อ้างอิงใบเสนอราคา / Quote Ref.</div>
-                  <div className="font-mono text-xs font-bold text-slate-600">
-                    {(() => {
-                      const q = quotations.find(qt => qt.id === viewingSO.quotation_id);
-                      if(q) return q.quotation_no + (q.revision_number ? `-R${String(q.revision_number).padStart(2, '0')}` : '');
-                      return 'ไม่พบการอ้างอิงแยก';
-                    })()}
-                  </div>
+                  <div className="font-mono text-xs font-bold text-slate-600">{quotations.find(q => q.id === viewingSO.quotation_id)?.quotation_no || 'ไม่พบการอ้างอิงแยก'}</div>
                   <div className="text-[11px] font-bold text-slate-400 pt-2">ลงวันที่เริ่มรับงาน / Date Assigned</div>
                   <div className="font-bold">{viewingSO.order_date}</div>
                 </div>

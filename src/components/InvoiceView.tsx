@@ -860,209 +860,205 @@ export default function InvoiceView({
               </div>
             </div>
 
-            {/* Print Sheet: High Visual Quality mimicking IKM Testing PDF perfectly */}
-            <div className="p-8 md:p-12 space-y-6 font-sans bg-white print:p-0 text-slate-800 relative">
-              
-              {/* Watermark Label on paper top center */}
-              <div className="absolute top-8 right-8 border-2 border-slate-950 px-4 py-1.5 text-center leading-none inline-block min-w-[110px] rounded">
-                <span className="text-slate-950 font-black text-xs tracking-widest block uppercase">{printWatermark}</span>
-              </div>
-
-              {/* Document Banner */}
-              <div className="flex justify-between items-start border-b-2 border-slate-900 pb-5 pt-4">
-                <div className="flex gap-4.5 items-start">
-                  <div className="w-16 h-16 bg-rose-600 text-white rounded flex flex-col items-center justify-center font-black text-2xl tracking-tighter shadow-xs leading-none shrink-0 border-b-4 border-rose-850">
-                    <span>IKM</span>
-                    <span className="text-[9px] font-black tracking-widest mt-0.5 uppercase">GROUP</span>
-                  </div>
+            {/* Print Sheet: Pixel Perfect IKM Testing PDF perfectly */}
+            <div className="bg-white print:p-0 print:m-0 text-black font-sans w-[210mm] min-h-[297mm] mx-auto relative select-none" style={{ fontFamily: 'Arial, sans-serif' }}>
+              <div className="p-10 md:p-10 w-full h-full pb-20">
+                {/* Header */}
+                <div className="flex justify-between items-start mb-4">
+                  {/* Left Header */}
                   <div>
-                    <h1 className="text-slate-950 font-black text-lg tracking-wide uppercase leading-none">IKM Testing (Thailand) Co., Ltd.</h1>
-                    <span className="text-[10.5px] text-slate-600 block mt-1.5 leading-normal font-medium max-w-sm">
-                      110/3 Moo 2, Ban-Chang, Ban-Chang, Rayong 21130 THAILAND<br />
-                      Tel: +66 (0) 38 604 186 / Fax: +66 (0) 38 604 189
-                    </span>
-                    <span className="text-[10px] text-slate-500 block font-mono mt-1">TAX ID: 0105552089123 (Head Office) | Email: info@ikmtesting.co.th</span>
+                    <h1 className="text-[19px] font-normal tracking-wide uppercase mb-2 text-black leading-none">IKM TESTING (THAILAND) CO.,LTD.</h1>
+                    <div className="text-[12px] leading-snug font-normal text-black">
+                      <span className="block mb-0.5">155/167 Moo 5, Samnakthon Sub-district,</span>
+                      <span className="block mb-0.5">Banchang District, Rayong Province 21130</span>
+                      <span className="block mb-0.5">Thailand</span>
+                      <span className="block mb-2">Tel : +66(0) 38 601 996-7</span>
+                      
+                      <span className="block mt-4 mb-0.5">Tax ID Number : 0215552000909</span>
+                      <span className="block">Head Office</span>
+                    </div>
+                  </div>
+                  
+                  {/* Right Header */}
+                  <div className="flex flex-col items-end pr-2 pt-1">
+                    <div className="text-[#e21836] text-[22px] font-bold tracking-wider mb-2">{printWatermark === 'ORIGINAL' ? 'ORIGINAL' : printWatermark}</div>
+                    <img src="https://drive.google.com/uc?export=view&id=1u2v-GT6YDaWZZoravixstbtyQkvudkbw" alt="IKM Logo" className="h-14 w-auto object-contain mr-2 mb-2" referrerPolicy="no-referrer" />
+                    <div className="text-[#e21836] text-[19px] font-bold tracking-wider mr-2 mt-4">INVOICE / TAX INVOICE</div>
                   </div>
                 </div>
-                <div className="text-right space-y-0.5 pt-3 pr-28">
-                  <h2 className="text-rose-600 font-black text-2xl tracking-wide leading-none">{printDocType}</h2>
-                  <span className="text-[11px] font-bold text-slate-400 block pb-1">ใบแจ้งหนี้ / ใบกำกับภาษี</span>
-                  <div className="text-[10.5px] bg-slate-50 border border-slate-200 px-3 py-2 rounded-lg space-y-1 text-left inline-block min-w-[210px] shadow-2xs font-mono">
-                    <div className="flex justify-between">
-                      <span className="text-slate-400 font-bold">Invoice No.:</span>
-                      <span className="font-bold text-slate-850">{viewingInvoice.invoice_no}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-slate-400 font-bold">Invoice Date:</span>
-                      <span className="font-semibold text-slate-800">{viewingInvoice.issue_date}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-slate-400 font-bold">Due Date:</span>
-                      <span className="font-bold text-rose-600">{viewingInvoice.due_date}</span>
-                    </div>
-                    {((viewingInvoice as any).reference_po) && (
-                      <div className="flex justify-between border-t border-slate-200 pt-1 mt-1 text-[10px]">
-                        <span className="text-slate-400 font-bold">P.O. Reference:</span>
-                        <span className="font-semibold text-slate-800 font-mono text-right truncate max-w-[100px]" title={(viewingInvoice as any).reference_po}>
-                          {(viewingInvoice as any).reference_po}
-                        </span>
+
+                {/* Customer and Invoice Details Section */}
+                <div className="mt-1 border border-black flex h-[140px]">
+                  {/* Left Box (Customer) */}
+                  <div className="w-[58%] border-r border-black p-3 relative h-full flex flex-col justify-between">
+                    <div>
+                      <div className="text-[12.5px] mb-3 text-black">Invoice to :</div>
+                      <div className="text-[12.5px] text-black">
+                        {viewingInvoice.customer_name} {viewingInvoice.customer_name.toLowerCase().includes('head office') ? '' : '(Head Office)'}
                       </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* Client Info and Bank details boxes side by side */}
-              <div className="grid grid-cols-2 gap-6 text-[11px] pt-1 leading-relaxed">
-                <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-1 shadow-2xs">
-                  <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">ใบเสร็จให้แก่ / INVOICE TO:</div>
-                  <div className="text-slate-950 font-black text-sm">{viewingInvoice.customer_name}</div>
-                  <div className="text-slate-650 space-y-0.5 pt-1.5 font-medium">
-                    <div><strong>Tax Identification:</strong> {customers.find(c => c.id === viewingInvoice.customer_id)?.tax_id || '-'}</div>
-                    <div><strong>Telephone:</strong> {customers.find(c => c.id === viewingInvoice.customer_id)?.phone || '-'}</div>
-                    <div className="whitespace-pre-line leading-normal">
-                      <strong>Billing Address:</strong> {customers.find(c => c.id === viewingInvoice.customer_id)?.address || '-'}
+                      <div className="text-[12.5px] leading-snug mt-1 max-w-[90%] break-words whitespace-pre-wrap uppercase text-black">
+                        {customers.find(c => c.id === viewingInvoice.customer_id)?.address || '-'}
+                      </div>
+                    </div>
+                    <div className="text-[12.5px] leading-none text-black absolute bottom-3 left-3">
+                      Tax ID Number {customers.find(c => c.id === viewingInvoice.customer_id)?.tax_id || '-'}
                     </div>
                   </div>
-                </div>
-                <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-2.5 shadow-2xs">
-                  <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">ข้อมูลบัญชีสำหรับการส่งมอบ / BANK DETAILS:</div>
-                  <div className="text-[11.5px] leading-relaxed text-slate-700 font-medium">
-                    Payment should be forwarded via Bank Transfer directly to our account:<br />
-                    <span className="block mt-1 font-bold text-slate-900 leading-normal">
-                      United Overseas Bank (Thai) Public Company Limited<br />
-                      Rayong Branch, Savings Account<br />
-                      A/C Account No: <strong className="font-mono text-rose-600 text-sm">908-112-441-2</strong>
-                    </span>
-                    <span className="block mt-1.5 font-semibold text-slate-800">
-                      In favour of: IKM Testing (Thailand) Co., Ltd.
-                    </span>
-                  </div>
-                  <div className="text-[10px] text-slate-450 italic leading-snug border-t border-slate-200 pt-1.5 font-mono">
-                    * Please forward Bank Pay-in Slip clearly referencing Invoice No. {viewingInvoice.invoice_no} to accounting team.
-                  </div>
-                </div>
-              </div>
 
-              {/* Itemized Table of delivers */}
-              <div className="overflow-hidden border border-slate-350 rounded-xl shadow-2xs mt-3 bg-white">
-                <table className="w-full text-xs text-left border-collapse">
-                  <thead>
-                    <tr className="bg-slate-100 border-b-2 border-slate-350 font-bold uppercase text-slate-700">
-                      <th className="px-3 py-2 border-r border-slate-200 text-center w-12 text-[10px]">No.</th>
-                      <th className="px-3 py-2 border-r border-slate-200 text-[10px]">รายละเอียดสินค้า / บริการ (Description of Services)</th>
-                      <th className="px-3 py-2 border-r border-slate-200 text-center w-14 text-[10px]">Qty</th>
-                      <th className="px-3 py-2 border-r border-slate-200 text-center w-16 text-[10px]">Unit</th>
-                      <th className="px-3 py-2 border-r border-slate-200 text-right w-28 text-[10px]">Rate THB</th>
-                      <th className="px-3 py-2 text-right w-32 text-[10px]">Amount THB</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-200 text-slate-800">
-                    {viewingInvoice.items && viewingInvoice.items.length > 0 ? (
-                      viewingInvoice.items.map((item, idx) => (
-                        <tr key={item.id || idx} className="hover:bg-slate-50/40">
-                          <td className="px-3 py-3 border-r border-slate-200 text-center font-mono text-slate-500 font-bold">{idx + 1}</td>
-                          <td className="px-3 py-3 border-r border-slate-200 whitespace-pre-line tracking-tight leading-relaxed font-medium">
-                            {item.description}
-                          </td>
-                          <td className="px-3 py-3 border-r border-slate-200 text-center font-mono font-bold text-slate-900">{item.quantity}</td>
-                          <td className="px-3 py-3 border-r border-slate-200 text-center text-slate-600">{item.unit || (item as any).unit || 'Job'}</td>
-                          <td className="px-3 py-3 border-r border-slate-200 text-right font-mono">
-                            {((item.unit_rate !== undefined ? item.unit_rate : item.unit_price) || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                          </td>
-                          <td className="px-3 py-3 text-right font-mono font-extrabold text-slate-900">
-                            {item.amount ? item.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00'}
-                          </td>
-                        </tr>
-                      ))
-                    ) : (
-                      <tr className="hover:bg-slate-50/40">
-                        <td className="px-3 py-4 border-r border-slate-200 text-center font-mono text-slate-500 font-bold">1</td>
-                        <td className="px-3 py-4 border-r border-slate-200 font-medium">
-                          <span className="font-black text-slate-900 block">Services fee for Contract Work</span>
-                          <span className="text-[10px] text-slate-400 block mt-0.5">Reference Document / Job SO: {viewingInvoice.sales_order_id}</span>
-                        </td>
-                        <td className="px-3 py-4 border-r border-slate-200 text-center font-mono font-bold text-slate-900">1</td>
-                        <td className="px-3 py-4 border-r border-slate-200 text-center text-slate-600">Lot</td>
-                        <td className="px-3 py-4 border-r border-slate-200 text-right font-mono">
-                          {viewingInvoice.total_amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                        </td>
-                        <td className="px-3 py-4 text-right font-mono font-extrabold text-slate-900">
-                          {viewingInvoice.total_amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                        </td>
+                  {/* Right Box (Invoice details) */}
+                  <div className="w-[42%] p-3 relative h-full">
+                    <div className="text-[12.5px] leading-snug flex items-center mb-1 text-black">
+                      <span className="font-bold w-[130px]">Invoice Date</span> <span className="font-bold mr-1">:</span> {viewingInvoice.issue_date}
+                    </div>
+                    <div className="text-[12.5px] leading-snug flex items-center mb-5 text-black">
+                      <span className="font-bold w-[130px]">Due Date</span> <span className="font-bold mr-1">:</span> {viewingInvoice.due_date}
+                    </div>
+                    
+                    <div className="text-[12.5px] leading-snug flex items-center mb-5 text-black">
+                      <span className="font-bold w-[130px]">Invoice Number</span> <span className="font-bold mr-1">:</span> {viewingInvoice.invoice_no}
+                    </div>
+
+                    <div className="text-[12.5px] font-bold leading-none mb-1 text-black">Reference</div>
+                    <div className="text-[12.5px] leading-none text-black">{(viewingInvoice as any).reference_po || '-'}</div>
+                  </div>
+                </div>
+
+                {/* Items Table */}
+                <div className="mt-[20px]">
+                  <table className="w-full text-[12.5px] border-collapse">
+                    <thead>
+                      <tr className="border-y-[1.5px] border-black text-black">
+                        <th className="py-2.5 text-left font-bold w-[46%] pl-1">Description</th>
+                        <th className="py-2.5 text-center font-bold w-[12%]">Quantity</th>
+                        <th className="py-2.5 text-center font-bold w-[15%]">Unit Price</th>
+                        <th className="py-2.5 text-center font-bold w-[10%]">Tax</th>
+                        <th className="py-2.5 text-right font-bold w-[17%] pr-1">Amount THB</th>
                       </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
-
-              {/* Financial Calculation summary block */}
-              <div className="flex justify-between items-start text-xs pt-2">
-                <div className="max-w-md text-slate-500 font-semibold leading-relaxed bg-slate-50 p-4 border border-slate-200 rounded-xl space-y-1">
-                  <div className="text-slate-800 font-black text-[10px] uppercase tracking-wider">ข้อกำหนดพิเศษและเงื่อนไขหักภาษี / WITHHOLDING TAX AND TERMS:</div>
-                  <div className="text-[10px] text-slate-500 leading-relaxed font-mono whitespace-pre-line space-y-1.5">
-                    {viewingInvoice.remarks ? `Remarks: ${viewingInvoice.remarks}\n` : ''}
-                    - Please Deduct Withholding Tax for Service 3% and or Rental 5% as per Thai Revenue Code.<br />
-                    - Late payments are subject to standard penalty rate of 1.5% per month.<br />
-                    - Goods remain the dynamic property of IKM Testing (Thailand) Co., Ltd. until fully paid.
-                  </div>
-                </div>
-                
-                <div className="w-80 space-y-1.5 border border-slate-300 p-4 rounded-xl bg-slate-50 shadow-3xs font-mono">
-                  <div className="flex justify-between text-slate-600 text-[11px] font-bold">
-                    <span>ยอดรวมสุทธิ / Subtotal THB:</span>
-                    <span className="font-bold text-slate-900">{viewingInvoice.total_amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                  </div>
-                  <div className="flex justify-between text-slate-600 text-[11px] font-bold">
-                    <span>ภาษีมูลค่าเพิ่ม / VAT (7%):</span>
-                    <span className="font-bold text-slate-900">{viewingInvoice.vat_amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                  </div>
-                  <div className="flex justify-between border-t border-slate-300 pt-2.5 text-rose-600 font-black text-sm">
-                    <span>รวมทั้งสิ้น / Grand Total THB:</span>
-                    <span>{viewingInvoice.grand_total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                  </div>
-                  <div className="flex justify-between border-t border-dashed border-slate-300 pt-1.5 text-slate-500 text-[10px]">
-                    <span>Amount Paid:</span>
-                    <span className="font-bold">{viewingInvoice.status === 'Paid' ? `฿${viewingInvoice.grand_total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : '฿0.00'}</span>
-                  </div>
-                  <div className="flex justify-between text-slate-800 text-[11px] font-black border-double border-t-2 border-slate-300 pt-1.5">
-                    <span>ยอดค้างรับ / Amount Due THB:</span>
-                    <span>{viewingInvoice.status === 'Paid' ? '0.00' : viewingInvoice.grand_total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Authorized execution block */}
-              <div className="grid grid-cols-2 gap-12 pt-10 text-center text-[10.5px]">
-                <div className="space-y-10">
-                  <span className="text-slate-400 font-black uppercase tracking-wider block">FOR IKM TESTING (THAILAND) CO., LTD.</span>
+                    </thead>
+                    <tbody>
+                      {viewingInvoice.items && viewingInvoice.items.length > 0 ? (
+                        viewingInvoice.items.map((item, idx) => (
+                           <tr key={idx}>
+                             <td className="pt-2 pb-0 whitespace-pre-wrap leading-tight text-black pl-1">{item.description}</td>
+                             <td className="pt-2 pb-0 text-center align-top text-black">
+                                {item.quantity === parseFloat(item.quantity.toString()) && item.quantity % 1 === 0 ? item.quantity + '.00' : item.quantity.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                             </td>
+                             <td className="pt-2 pb-0 text-center align-top text-black">
+                                {((item.unit_rate !== undefined ? item.unit_rate : item.unit_price) || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                             </td>
+                             <td className="pt-2 pb-0 text-center align-top text-black">
+                                {item.tax_rate || 7}%
+                             </td>
+                             <td className="pt-2 pb-0 text-right align-top text-black pr-1">
+                                {(item.amount || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                             </td>
+                           </tr>
+                        ))
+                      ) : (
+                        <tr>
+                           <td className="pt-2 pb-0 text-black pl-1">(3006050001) Services fee for Contract Work<br/>{(viewingInvoice as any).reference_po}</td>
+                           <td className="pt-2 pb-0 text-center align-top text-black">1.00</td>
+                           <td className="pt-2 pb-0 text-center align-top text-black">{Math.round(viewingInvoice.total_amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                           <td className="pt-2 pb-0 text-center align-top text-black">7%</td>
+                           <td className="pt-2 pb-0 text-right align-top text-black pr-1">{viewingInvoice.total_amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
                   
-                  {/* Circle frame mimicking real stamp */}
-                  <div className="w-24 h-24 border-2 border-dashed border-rose-500/30 rounded-full flex items-center justify-center mx-auto text-rose-500/30 font-black text-[9px] select-none tracking-widest leading-none rotate-12">
-                    <div className="text-center">
-                      <span>IKM STAMP</span><br/>
-                      <span className="text-[7.5px]">RAYONG BR.</span>
+                  {/* Spacing for item section similar to reference */}
+                  <div className="h-[90px]"></div>
+                  
+                </div>
+
+                {/* Amount Summary */}
+                <div className="flex justify-end pr-1 mt-6">
+                  <div className="w-[45%]">
+                    <div className="flex border-t border-black pt-1 pb-1">
+                      <div className="w-[60%] text-right pr-9 text-[12.5px] text-black">Subtotal</div>
+                      <div className="w-[40%] text-right text-[12.5px] text-black">{viewingInvoice.total_amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+                    </div>
+                    <div className="flex pt-1 pb-1">
+                      <div className="w-[60%] text-right pr-9 text-[12.5px] text-black">Total VAT on Sales 7%</div>
+                      <div className="w-[40%] text-right text-[12.5px] text-black">{viewingInvoice.vat_amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+                    </div>
+                    <div className="flex border-t border-black pt-1 pb-1">
+                      <div className="w-[60%] text-right pr-9 text-[12.5px] text-black">Invoice Total THB</div>
+                      <div className="w-[40%] text-right text-[12.5px] text-black">{viewingInvoice.grand_total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+                    </div>
+                    <div className="flex border-b border-black pt-1 pb-[6px]">
+                      <div className="w-[60%] text-right pr-9 text-[12.5px] text-black">Total Net Payments THB</div>
+                      <div className="w-[40%] text-right text-[12.5px] text-black">0.00</div>
+                    </div>
+                    <div className="flex pt-[7px] pb-1">
+                      <div className="w-[60%] text-right pr-9 text-[12.5px] font-bold text-black">Amount Due THB</div>
+                      <div className="w-[40%] text-right text-[12.5px] font-bold text-black">{viewingInvoice.grand_total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
                     </div>
                   </div>
-
-                  <div className="border-b border-slate-300 w-52 mx-auto pb-1 text-slate-700 font-black font-mono">
-                    AUTHORIZED SIGNATURE
-                  </div>
-                  <span className="text-[9.5px] text-slate-400 font-bold block uppercase tracking-wider">Authorized Collector & Cashier</span>
                 </div>
-                <div className="space-y-10">
-                  <span className="text-slate-400 font-black uppercase tracking-wider block">ผู้มีอำนาจลงนามผู้ซื้อ / CUSTOMER APPROVAL</span>
+
+                {/* Remark & Bottom Section */}
+                <div className="mt-8 flex justify-between pr-2">
+                  <div className="w-[50%]">
+                    <div className="text-[12.5px] italic underline text-black underline-offset-[3px] mb-1.5">(Please Deduct Withholding Tax for Service 3% and or Rental 5%)</div>
+                    <div className="text-[12px] leading-[1.6] text-black font-normal">
+                      General Term &amp; Condition of Sales &amp; Hire apply Note<br />
+                      : Late payments, the company charges a penalty of 1.25%<br />
+                      per month หมายเหตุ :การชาระเงินเกินกำหนด บริษัทฯ คิดเบี้ยปรับ<br />
+                      1.25% ต่อเดือน<br />
+                      In the event of discrepancy, Kindly contact<br />
+                      our Accounts department within 7 days In writing from the<br />
+                      Invoice
+                    </div>
+                    
+                    {/* Signature area */}
+                    <div className="mt-[135px] ml-4">
+                      <div className="border-t border-black w-[280px] border-dashed">
+                         <div className="text-[12px] pt-1 text-black font-normal">Authorised Signature</div>
+                      </div>
+                    </div>
+                  </div>
                   
-                  {/* Empty signature spacer */}
-                  <div className="h-24"></div>
+                  <div className="w-[45%] flex flex-col pt-3">
+                     {/* Stamp */}
+                     <div className="mb-8 w-full flex pl-6">
+                       <svg viewBox="0 0 120 120" className="w-[115px] h-[115px] text-[#335bb2] opacity-85 transform -rotate-[15deg]">
+                         <circle cx="60" cy="60" r="54" fill="none" stroke="currentColor" strokeWidth="1.2" />
+                         <circle cx="60" cy="60" r="52.2" fill="none" stroke="currentColor" strokeWidth="0.5" />
+                         
+                         <path id="top-arc" fill="none" d="M 18 60 A 42 42 0 0 1 102 60" />
+                         <path id="bottom-arc" fill="none" d="M 102 60 A 42 42 0 0 1 18 60" />
+                         
+                         <text className="text-[11px] font-bold fill-current tracking-tighter" style={{ fontFamily: 'Arial, Helvetica, sans-serif' }}>
+                           <textPath href="#top-arc" startOffset="50%" textAnchor="middle">บริษัท ไอเคเอ็ม เทสติ้ง (ประเทศไทย) จำกัด</textPath>
+                         </text>
+                         <text className="text-[8.5px] font-bold fill-current tracking-normal" style={{ fontFamily: 'Arial, Helvetica, sans-serif' }}>
+                           <textPath href="#bottom-arc" startOffset="50%" textAnchor="middle">IKM TESTING (THAILAND) COMPANY LIMITED</textPath>
+                         </text>
+                         {/* Stars */}
+                         <text x="11.5" y="64" className="text-[13px] font-bold fill-current">★</text>
+                         <text x="96" y="64" className="text-[13px] font-bold fill-current">★</text>
+                       </svg>
+                     </div>
 
-                  <div className="border-b border-slate-300 w-52 mx-auto pb-1 text-slate-700 font-bold">
-                    .....................................................
+                     {/* Bank Details */}
+                     <div className="text-[12.5px] leading-[1.6] text-black pr-2">
+                        <div>Please make Cheque payable to</div>
+                        <div className="mb-4">IKM TESTING (THAILAND) CO.,LTD.</div>
+                        
+                        <div>Or remit to our bank as follows</div>
+                        <div>BANK Account No. 783-3250-60-8</div>
+                        <div>Swift code : UOVBTHBK</div>
+                        <div>BANK : United Overseas Bank (Thai) public company Limited.</div>
+                        <div>51/12 Moo 5 Sukhumvit road, Amphoe Ban chang ,</div>
+                        <div>Rayong 21130. THAILAND</div>
+                        
+                        <div className="mt-4">All local &amp; Oversea bank charges to be borne by Remitter's a/cs</div>
+                     </div>
                   </div>
-                  <span className="text-[9.5px] text-slate-400 font-bold block uppercase tracking-wider">Signature & Company Seal Frame</span>
                 </div>
-              </div>
 
+              </div>
             </div>
           </div>
         </div>

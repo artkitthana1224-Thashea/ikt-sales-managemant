@@ -152,6 +152,81 @@ export interface SalesOrder {
   customer_name?: string;
 }
 
+export type ProjectStatus = 'Pending' | 'Mobilizing' | 'On Going' | 'Completed' | 'Ready For Invoice' | 'On Hold' | 'Delayed' | 'Cancelled' | 'Closed';
+
+export interface ProjectTask {
+  id: string;
+  project_id: string;
+  task_name: string;
+  description?: string;
+  responsible_person: string;
+  start_date: string;
+  due_date: string;
+  status: 'Pending' | 'In Progress' | 'Completed' | 'Cancelled';
+  progress: number;
+  remark?: string;
+  created_at: string;
+}
+
+export interface ProjectMilestone {
+  id: string;
+  project_id: string;
+  milestone_name: string;
+  target_date: string;
+  actual_date?: string;
+  status: 'Pending' | 'Completed' | 'Delayed';
+  responsible_person: string;
+  remark?: string;
+}
+
+export interface ProjectTimeline {
+  id: string;
+  project_id: string;
+  event_name: string;
+  date: string;
+  time: string;
+  responsible_person: string;
+  remark?: string;
+}
+
+export interface ProjectProgressLog {
+  id: string;
+  project_id: string;
+  progress_percent: number;
+  logged_date: string;
+  note?: string;
+  logged_by: string;
+}
+
+export interface Project {
+  id: string;
+  job_number: string;
+  sales_order_id: string;
+  customer_id: string;
+  project_name: string;
+  project_manager?: string;
+  sales_representative?: string;
+  start_date?: string;
+  end_date?: string;
+  duration_days?: number;
+  progress_percent: number;
+  status: ProjectStatus;
+  contract_value: number;
+  created_at: string;
+  updated_at: string;
+  
+  // Virtual / joined fields
+  customer_name?: string;
+  sales_order_no?: string;
+  invoice_status?: string;
+  collection_status?: string;
+  
+  tasks?: ProjectTask[];
+  milestones?: ProjectMilestone[];
+  timeline?: ProjectTimeline[];
+  progress_logs?: ProjectProgressLog[];
+}
+
 export interface DeliveryJob {
   id: string;
   delivery_no: string;

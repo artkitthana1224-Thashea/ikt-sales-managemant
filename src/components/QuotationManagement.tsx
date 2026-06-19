@@ -91,7 +91,7 @@ export default function QuotationManagement() {
             <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
                <h3 className="text-base font-bold text-slate-800 mb-4">Quotation Status Distribution</h3>
                <div className="h-[300px]">
-                 <ResponsiveContainer width="100%" height="100%">
+                 <ResponsiveContainer width="100%" height="100%" minHeight={1} minWidth={1}>
                    <PieChart>
                      <Pie data={statusData} cx="50%" cy="50%" innerRadius={70} outerRadius={100} paddingAngle={2} dataKey="value">
                        {statusData.map((entry, index) => ( <Cell key={`cell-${index}`} fill={entry.color} /> ))}
@@ -131,8 +131,7 @@ function QuoteList({ quotations, onEdit, onPrint, onRefresh }: any) {
   const [statusFilter, setStatusFilter] = useState('ALL');
 
   const filtered = quotations.filter(q => {
-     const fullQuoteNo = q.quotation_no + (q.revision_number > 0 ? `-R${String(q.revision_number).padStart(2, '0')}` : '');
-     const matchesSearch = fullQuoteNo.toLowerCase().includes(search.toLowerCase()) || q.title.toLowerCase().includes(search.toLowerCase()) || (q.customer?.customer_name || '').toLowerCase().includes(search.toLowerCase());
+     const matchesSearch = q.quotation_no.toLowerCase().includes(search.toLowerCase()) || q.title.toLowerCase().includes(search.toLowerCase()) || (q.customer?.customer_name || '').toLowerCase().includes(search.toLowerCase());
      const matchesStatus = statusFilter === 'ALL' || q.status === statusFilter;
      return matchesSearch && matchesStatus;
   });
@@ -168,7 +167,7 @@ function QuoteList({ quotations, onEdit, onPrint, onRefresh }: any) {
                <tr key={q.id} className="hover:bg-slate-50/80 transition-colors">
                  <td className="py-3 px-4">
                     <span className="font-mono text-sm font-bold text-blue-600">{q.quotation_no}</span>
-                    {q.revision_number && q.revision_number > 0 ? <span className="ml-2 text-xs font-bold px-1.5 py-0.5 bg-yellow-100 text-yellow-800 rounded">Rev.{String(q.revision_number).padStart(2, '0')}</span> : null}
+                    {q.revision_number && q.revision_number > 0 ? <span className="ml-2 text-xs font-bold px-1.5 py-0.5 bg-yellow-100 text-yellow-800 rounded">Rev.{q.revision_number}</span> : null}
                  </td>
                  <td className="py-3 px-4">
                     <div className="text-sm font-bold text-slate-800">{q.title}</div>
@@ -232,12 +231,8 @@ function QuoteForm({ id, onClose, quotations, customers }: any) {
     let newQuoteNo = initialQuote?.quotation_no;
     if(!newQuoteNo) {
        const yr = new Date().getFullYear().toString().slice(-2);
-       const seqs = quotations.filter((q:any) => q.quotation_no?.includes(`-${yr}`)).map((q:any) => {
-         const match = q.quotation_no?.match(/^QT-(\d{4})-\d{2}/);
-         return match ? parseInt(match[1], 10) : 0;
-       });
-       const nextSeq = Math.max(...seqs, 4000) + 1;
-       newQuoteNo = `QT-${nextSeq.toString().padStart(4, '0')}-${yr}`;
+       const qsCount = quotations.filter((q:any) => q.quotation_no?.includes(`-${yr}`)).length + 1;
+       newQuoteNo = `QT-${qsCount.toString().padStart(4, '0')}-${yr}`;
     }
 
     const payload = {
@@ -250,6 +245,7 @@ function QuoteForm({ id, onClose, quotations, customers }: any) {
       sales_person: fd.get('sales'),
       status: fd.get('status'),
       revision_number: parseInt(fd.get('revision') as string) || 0,
+      remarks: fd.get('remarks') || '',
       terms_conditions: fd.get('terms'),
       items: items.map((i, idx) => ({
          item_no: idx + 1,
@@ -372,9 +368,15 @@ function QuoteForm({ id, onClose, quotations, customers }: any) {
              </div>
           </div>
 
-          <div>
-             <label className="block text-sm font-bold text-slate-700 mb-1.5">Terms & Conditions</label>
-             <textarea name="terms" defaultValue={initialQuote?.terms_conditions || "1. Price validity 30 days.\n2. Payment terms 30 days.\n3. Delivery within schedule."} rows={4} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-slate-50 resize-y" />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+             <div>
+                <label className="block text-sm font-bold text-slate-700 mb-1.5">Remarks / Notes</label>
+                <textarea name="remarks" defaultValue={initialQuote?.remarks || ""} rows={3} placeholder="Add professional notes..." className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-slate-50 resize-y" />
+             </div>
+             <div>
+                <label className="block text-sm font-bold text-slate-700 mb-1.5">Terms & Conditions</label>
+                <textarea name="terms" defaultValue={initialQuote?.terms_conditions || "1. Price validity 30 days.\n2. Payment terms 30 days.\n3. Delivery within schedule."} rows={3} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-slate-50 resize-y" />
+             </div>
           </div>
        </div>
        <div className="bg-slate-50 px-6 py-4 border-t border-slate-200 flex justify-end gap-3">
@@ -421,7 +423,7 @@ function PrintPreview({ id, onClose, onEdit, quotations, customers }: any) {
                <div className="mt-1">Tel : + 66 38 601 996 to 8</div>
             </div>
             <div className="text-right">
-               <img src="https://drive.google.com/thumbnail?id=1u2v-GT6YDaWZZoravixstbtyQkvudkbw&sz=w800" alt="IKM Logo" className="h-[60px] object-contain" referrerPolicy="no-referrer" />
+               <img src="https://drive.google.com/uc?export=view&id=1u2v-GT6YDaWZZoravixstbtyQkvudkbw" alt="IKM Logo" className="h-[60px] object-contain" referrerPolicy="no-referrer" />
             </div>
          </div>
 
@@ -441,7 +443,7 @@ function PrintPreview({ id, onClose, onEdit, quotations, customers }: any) {
             <div className="w-[250px]">
                <div className="mb-2 uppercase tracking-wide">QUOTATION</div>
                <div className="grid grid-cols-[80px_10px_1fr]">
-                  <div>Our Ref.</div><div>:</div><div>{quote.quotation_no}{quote.revision_number > 0 ? `-R${String(quote.revision_number).padStart(2, '0')}` : ''}</div>
+                  <div>Our Ref.</div><div>:</div><div>{quote.quotation_no}{quote.revision_number > 0 ? `-R${quote.revision_number}` : ''}</div>
                   <div>Date</div><div>:</div><div>{new Date(quote.quotation_date).toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric'})}</div>
                   <div className="mt-2">No. of Page</div><div className="mt-2">:</div><div className="mt-2">1</div>
                </div>
@@ -458,7 +460,7 @@ function PrintPreview({ id, onClose, onEdit, quotations, customers }: any) {
 
          {/* Items Table */}
          <div className="min-h-[400px]">
-            <table className="w-full text-[11px] text-left border-collapse border border-black mb-2">
+            <table className="w-full text-[11px] text-left border-collapse border border-black mb-2 table-fixed">
                <thead>
                  <tr className="border-b border-black">
                     <th className="py-2 px-2 text-center w-[40px] border-r border-black font-normal align-middle">ITEM</th>
@@ -485,12 +487,12 @@ function PrintPreview({ id, onClose, onEdit, quotations, customers }: any) {
                </thead>
                <tbody className="align-top">
                  {quote.items.map((it:any, idx:number) => (
-                    <tr key={idx}>
-                       <td className="py-2 px-2 text-center border-r border-black border-none">{idx + 1}</td>
-                       <td className="py-2 px-2 text-center border-r border-black border-none">{it.qty}</td>
-                       <td className="py-2 px-2 text-center border-r border-black border-none">{it.unit}</td>
-                       <td className="py-2 px-3 border-r border-black border-none">
-                          <div className="font-normal">{it.description}</div>
+                    <tr key={idx} className="border-b border-black">
+                       <td className="py-2 px-2 text-center border-r border-black">{idx + 1}</td>
+                       <td className="py-2 px-2 text-center border-r border-black">{it.qty}</td>
+                       <td className="py-2 px-2 text-center border-r border-black">{it.unit}</td>
+                       <td className="py-2 px-3 border-r border-black break-words">
+                          <div className="font-normal whitespace-pre-wrap">{it.description}</div>
                           {it.duration === 1 && it.unit === 'Team' && (
                             <div className="mt-1 text-[10px]">
                               ** Manpower rate base on working 8.00 - 17.00 (8hrs) on Mon to Sat<br/>
@@ -499,17 +501,17 @@ function PrintPreview({ id, onClose, onEdit, quotations, customers }: any) {
                             </div>
                           )}
                        </td>
-                       <td className="py-2 px-2 text-center border-r border-black border-none">{it.duration || '1'}</td>
-                       <td className="py-2 px-2 text-right border-r border-black border-none font-sans">{(it.unit_rate).toLocaleString(undefined, {minimumFractionDigits:2})}</td>
-                       <td className="py-2 px-2 text-right border-none font-sans">{(it.total_price).toLocaleString(undefined, {minimumFractionDigits:2})}</td>
+                       <td className="py-2 px-2 text-center border-r border-black">{it.duration || '1'}</td>
+                       <td className="py-2 px-2 text-right border-r border-black font-sans">{(it.unit_rate).toLocaleString(undefined, {minimumFractionDigits:2})}</td>
+                       <td className="py-2 px-2 text-right font-sans">{(it.total_price).toLocaleString(undefined, {minimumFractionDigits:2})}</td>
                     </tr>
                  ))}
                  
-                 <tr>
+                 <tr className="border-b border-black">
                     <td className="py-4 border-r border-black"></td>
                     <td className="py-4 border-r border-black"></td>
                     <td className="py-4 border-r border-black"></td>
-                    <td className="py-4 px-3 border-r border-black format-whitespace text-[11px] font-bold italic">
+                    <td className="py-4 px-3 border-r border-black format-whitespace text-[11px] font-bold italic break-words">
                        {quote.items.length < 3 && "Note : Air Compressor, Electrical, Water, Loading and Lifting Equipment at Client Side By client."}
                     </td>
                     <td className="py-4 border-r border-black"></td>
@@ -517,11 +519,11 @@ function PrintPreview({ id, onClose, onEdit, quotations, customers }: any) {
                     <td className="py-4"></td>
                  </tr>
 
-                 <tr>
+                 <tr className="border-b border-black">
                     <td className="py-8 border-r border-black"></td>
                     <td className="py-8 border-r border-black"></td>
                     <td className="py-8 border-r border-black"></td>
-                    <td className="py-8 text-center border-r border-black font-bold">***LAST ENTRY**</td>
+                    <td className="py-8 text-center border-r border-black font-bold break-words">***LAST ENTRY**</td>
                     <td className="py-8 border-r border-black"></td>
                     <td className="py-8 border-r border-black"></td>
                     <td className="py-8"></td>
@@ -537,7 +539,13 @@ function PrintPreview({ id, onClose, onEdit, quotations, customers }: any) {
          </div>
 
          <div className="text-[11px] leading-relaxed mb-12">
-            <div>Terms & Conditions:</div>
+            {quote.remarks && (
+               <div className="mb-4">
+                  <div className="font-bold underline mb-1">Remarks / Notes:</div>
+                  <div className="whitespace-pre-line">{quote.remarks}</div>
+               </div>
+            )}
+            <div className="font-bold underline mb-1">Terms & Conditions:</div>
             <div className="whitespace-pre-wrap">{quote.terms_conditions || `- 30 days validity from date of quotation.
 - All prices above are quoted in THB.
 - All prices does not include 7% VAT.

@@ -999,13 +999,13 @@ const SupabaseDB = {
     const qDate = quoteData.quotation_date || new Date().toISOString().slice(0, 10);
     const yr = qDate.split('-')[0].slice(-2); // e.g. "26"
 
-    let seq = 4001;
+    let seq = 1;
     if (quotes.length > 0) {
       const seqs = quotes.map(q => {
         const match = q.quotation_no.match(/^QT-(\d{4})-\d{2}/);
         return match ? parseInt(match[1], 10) : 0;
       });
-      seq = Math.max(...seqs, 4000) + 1;
+      seq = Math.max(...seqs, 0) + 1;
     }
     const nextCode = `QT-${String(seq).padStart(4, '0')}-${yr}`;
     const newId = crypto.randomUUID();
@@ -1026,9 +1026,12 @@ const SupabaseDB = {
     const isCloud = await this.testConnection();
     if (isCloud) {
        try {
+         const dbPayload = { ...newQuote };
+         delete dbPayload.customer;
+         delete dbPayload.customer_name;
          await restRequest('/quotations', {
            method: 'POST',
-           body: JSON.stringify(newQuote)
+           body: JSON.stringify(dbPayload)
          });
        } catch (err) {
          console.warn("Cloud addQuotation failed, completed locally", err);
@@ -1071,9 +1074,12 @@ const SupabaseDB = {
       const isCloud = await this.testConnection();
       if (isCloud) {
         try {
+          const dbPayload = { ...updatedQuote };
+          delete dbPayload.customer;
+          delete dbPayload.customer_name;
           await restRequest(`/quotations?id=eq.${id}`, {
             method: 'PATCH',
-            body: JSON.stringify(updatedQuote)
+            body: JSON.stringify(dbPayload)
           });
         } catch (e) {
           console.warn("Cloud updateQuotation failed, completed locally", e);

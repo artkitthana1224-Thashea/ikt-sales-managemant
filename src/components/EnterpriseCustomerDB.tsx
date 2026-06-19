@@ -388,7 +388,7 @@ function DetailOverviewTab({ customer }: { customer: any }) {
              <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider">Revenue History (12 Months)</h3>
            </div>
            <div className="h-[250px]">
-              <ResponsiveContainer width="100%" height="100%">
+              <ResponsiveContainer width="100%" height="100%" minHeight={1} minWidth={1}>
                 <BarChart data={mockRevenueData}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
                   <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{fontSize: 12, fill: '#64748B'}} />

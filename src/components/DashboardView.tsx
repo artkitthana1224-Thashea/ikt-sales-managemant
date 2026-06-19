@@ -269,7 +269,7 @@ export default function DashboardView({ customers, opportunities, onNavigate }: 
 
           <div className="h-64 my-4 flex items-center justify-center">
             {statusData.length > 0 ? (
-              <ResponsiveContainer width="100%" height="100%">
+              <ResponsiveContainer width="100%" height="100%" minHeight={1} minWidth={1}>
                 <PieChart>
                   <Pie
                     data={statusData}
@@ -323,7 +323,7 @@ export default function DashboardView({ customers, opportunities, onNavigate }: 
 
           <div className="h-80 mt-6 select-none">
             {statusData.length > 0 ? (
-              <ResponsiveContainer width="100%" height="100%">
+              <ResponsiveContainer width="100%" height="100%" minHeight={1} minWidth={1}>
                 <BarChart data={statusData} margin={{ top: 10, right: 10, left: 20, bottom: 20 }}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                   <XAxis 
@@ -385,7 +385,7 @@ export default function DashboardView({ customers, opportunities, onNavigate }: 
 
           <div className="h-72 mt-6">
             {monthlyData.length > 0 ? (
-              <ResponsiveContainer width="100%" height="100%">
+              <ResponsiveContainer width="100%" height="100%" minHeight={1} minWidth={1}>
                 <AreaChart data={monthlyData} margin={{ top: 10, right: 10, left: 20, bottom: 5 }}>
                   <defs>
                     <linearGradient id="colorTotal" x1="0" y1="0" x2="0" y2="1">

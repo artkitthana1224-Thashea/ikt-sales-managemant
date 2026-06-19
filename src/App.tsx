@@ -11,6 +11,7 @@ import ContactPersonView from './components/ContactPersonView';
 import AdministrationView from './components/AdministrationView';
 import QuotationView from './components/QuotationView';
 import SalesOrderView from './components/SalesOrderView';
+import DeliveryMonitoringView from './components/DeliveryMonitoringView';
 import DeliveryView from './components/DeliveryView';
 import InvoiceView from './components/InvoiceView';
 import ReceiptView from './components/ReceiptView';
@@ -42,7 +43,8 @@ import {
   Briefcase,
   Truck,
   FileSpreadsheet,
-  Wallet
+  Wallet,
+  ClipboardList
 } from 'lucide-react';
 
 export default function App() {
@@ -73,6 +75,7 @@ export default function App() {
   const [deliveryJobs, setDeliveryJobs] = useState<DeliveryJob[]>([]);
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [receipts, setReceipts] = useState<Receipt[]>([]);
+  const [projects, setProjects] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   
   // Connection and Toast notification
@@ -117,6 +120,9 @@ export default function App() {
 
       const recs = await CRMService.fetchReceipts();
       setReceipts(recs);
+
+      const projs = await (CRMService as any).fetchProjects();
+      setProjects(projs);
     } catch (err) {
       console.warn('Failed loading data from standard adapters', err);
       showToast('ไม่สามารถดึงข้อมูลจากโครงข่ายได้ ระบบใช้ข้อมูลสำรอง', 'err');
@@ -431,6 +437,57 @@ export default function App() {
     }
   };
 
+  // --- Projects CRUD ---
+  const handleAddProject = async (payload: Omit<any, 'id' | 'job_number' | 'created_at' | 'updated_at'>) => {
+    setLoading(true);
+    try {
+      const result = await (CRMService as any).insertProject(payload);
+      showToast('เปิดโครงการใหม่สำเร็จ', 'success');
+      await loadAllData();
+      await logSystemAction('สร้างโครงการใหม่ (Create Project)', 'system', result?.id || 'new', `ชื่อโครงการ: ${payload.project_name}`);
+    } catch (e: any) {
+      await loadAllData();
+      showToast(`คลาวด์ขัดข้อง: ${e.message}`, 'err');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleUpdateProject = async (id: string, updates: Partial<any>) => {
+    setLoading(true);
+    try {
+      await (CRMService as any).updateProject(id, updates);
+      showToast('อัปเดตข้อมูลโครงการสำเร็จ', 'success');
+      await loadAllData();
+      if (updates.status === 'Ready For Invoice') {
+        const proj = projects.find(p => p.id === id);
+        if (proj) {
+          // Send notification / action when ready for invoice
+          await logSystemAction('โครงการพร้อมแจ้งหนี้', 'system', id, `เปลี่ยนสถานะเป็นพร้อมวางบิล`);
+        }
+      }
+    } catch (e: any) {
+      await loadAllData();
+      showToast(`อัปเดตสำเร็จทางโลคอล: ${e.message}`, 'err');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteProject = async (id: string) => {
+    setLoading(true);
+    try {
+      await (CRMService as any).deleteProject(id);
+      showToast('ลบโครงการสำเร็จ', 'success');
+      await loadAllData();
+    } catch (e: any) {
+      await loadAllData();
+      showToast(`ลบสำเร็จทางโลคอล: ${e.message}`, 'err');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // --- Invoices CRUD ---
   const handleAddInvoice = async (payload: Omit<Invoice, 'id' | 'invoice_no' | 'created_at'>) => {
     setLoading(true);
@@ -681,6 +738,15 @@ export default function App() {
               </button>
 
               <button
+                id="menu-projects"
+                onClick={() => setActiveTab('projects')}
+                className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm font-semibold transition-all focus:outline-none cursor-pointer ${activeTab === 'projects' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'}`}
+              >
+                <ClipboardList className="w-4.5 h-4.5 shrink-0" />
+                Delivery & Ongoing Jobs
+              </button>
+
+              <button
                 id="menu-deliveries"
                 onClick={() => setActiveTab('deliveryJobs')}
                 className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm font-semibold transition-all focus:outline-none cursor-pointer ${activeTab === 'deliveryJobs' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'}`}
@@ -910,6 +976,20 @@ export default function App() {
                 onAdd={handleAddSalesOrder}
                 onUpdate={handleUpdateSalesOrder}
                 onDelete={handleDeleteSalesOrder}
+                onToast={showToast}
+                currentRole={currentRole}
+                currentUserId={currentUserId}
+              />
+            )}
+
+            {activeTab === 'projects' && (
+              <DeliveryMonitoringView
+                projects={projects}
+                salesOrders={salesOrders}
+                customers={customers}
+                onAdd={handleAddProject}
+                onUpdate={handleUpdateProject}
+                onDelete={handleDeleteProject}
                 onToast={showToast}
                 currentRole={currentRole}
                 currentUserId={currentUserId}

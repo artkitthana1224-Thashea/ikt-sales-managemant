@@ -985,6 +985,59 @@ const DEFAULT_RECEIPTS: Receipt[] = [
   }
 ];
 
+const DEFAULT_PROJECTS: Project[] = [
+  {
+    id: 'proj_qt3000',
+    job_number: 'JOB-25001',
+    sales_order_id: 'so_qt3000',
+    customer_id: 'c2',
+    project_name: 'Chemical Cleaning for QT3000 Boiler',
+    project_manager: 'Somchai P.',
+    sales_representative: 'Apiyut N.',
+    start_date: '2025-01-05',
+    end_date: '2025-01-20',
+    duration_days: 15,
+    progress_percent: 65,
+    status: 'On Going',
+    contract_value: 360000,
+    created_at: new Date('2024-12-16T09:00:00Z').toISOString(),
+    updated_at: new Date().toISOString(),
+    tasks: [
+      { id: 't1', project_id: 'proj_qt3000', task_name: 'Site Survey', responsible_person: 'Somchai P.', start_date: '2025-01-05', due_date: '2025-01-06', status: 'Completed', progress: 100, created_at: new Date().toISOString() },
+      { id: 't2', project_id: 'proj_qt3000', task_name: 'Mobilization', responsible_person: 'Winai T.', start_date: '2025-01-07', due_date: '2025-01-08', status: 'Completed', progress: 100, created_at: new Date().toISOString() },
+      { id: 't3', project_id: 'proj_qt3000', task_name: 'Chemical Flushing', responsible_person: 'Team A', start_date: '2025-01-09', due_date: '2025-01-15', status: 'In Progress', progress: 50, created_at: new Date().toISOString() }
+    ],
+    milestones: [
+      { id: 'm1', project_id: 'proj_qt3000', milestone_name: 'Project Kickoff', target_date: '2025-01-05', actual_date: '2025-01-05', status: 'Completed', responsible_person: 'Somchai P.' },
+      { id: 'm2', project_id: 'proj_qt3000', milestone_name: 'Flushing Completion', target_date: '2025-01-15', status: 'Pending', responsible_person: 'Team A' }
+    ],
+    timeline: [
+      { id: 'tl1', project_id: 'proj_qt3000', event_name: 'Project Created', date: '2024-12-16', time: '09:00', responsible_person: 'System' },
+      { id: 'tl2', project_id: 'proj_qt3000', event_name: 'Site Survey Completed', date: '2025-01-06', time: '16:00', responsible_person: 'Somchai P.' }
+    ]
+  },
+  {
+    id: 'proj_hvac',
+    job_number: 'JOB-25002',
+    sales_order_id: 'so_hvac', // this ID doesn't exist, I should link it to so_qt3227
+    customer_id: 'c_egat',
+    project_name: 'Lube Oil Flushing GNS - C2, C21, C22',
+    project_manager: 'Kasem M.',
+    sales_representative: 'Pimjai K.',
+    start_date: '2025-01-02',
+    end_date: '2025-01-25',
+    duration_days: 23,
+    progress_percent: 25,
+    status: 'Delayed',
+    contract_value: 544880,
+    created_at: new Date('2024-12-25T11:00:00Z').toISOString(),
+    updated_at: new Date().toISOString(),
+    tasks: [],
+    milestones: [],
+    timeline: []
+  }
+];
+
 // Helper to query Supabase REST API
 async function apiFetch(endpoint: string, options: RequestInit = {}) {
   const config = getSupabaseConfig();
@@ -1247,6 +1300,28 @@ class LocalDB {
 
   static saveReceipts(receipts: Receipt[]) {
     localStorage.setItem('crm_receipts', JSON.stringify(receipts));
+  }
+
+  static getProjects(): Project[] {
+    const data = localStorage.getItem('crm_projects');
+    if (!data) {
+      localStorage.setItem('crm_projects', JSON.stringify(DEFAULT_PROJECTS));
+      return DEFAULT_PROJECTS;
+    }
+    try {
+      const parsed = JSON.parse(data);
+      if (!Array.isArray(parsed) || !parsed.some(p => p.id === 'proj_qt3000')) {
+        localStorage.setItem('crm_projects', JSON.stringify(DEFAULT_PROJECTS));
+        return DEFAULT_PROJECTS;
+      }
+      return parsed;
+    } catch {
+      return DEFAULT_PROJECTS;
+    }
+  }
+
+  static saveProjects(projects: Project[]) {
+    localStorage.setItem('crm_projects', JSON.stringify(projects));
   }
 }
 
@@ -1926,6 +2001,23 @@ export const CRMService = {
   // QUOTATION SERVICES (Module 4)
   // -------------------------------------------------------------
   async fetchQuotations(): Promise<Quotation[]> {
+    const isCloud = await this.checkCloudConnection();
+    if (isCloud && getConnectivityMode()) {
+      try {
+        const raw = await apiFetch('/quotations?order=quotation_no.desc');
+        const custs = await this.fetchCustomers();
+        const custMap = new Map(custs.map(c => [c.id, c]));
+        
+        const parsed = (raw as any[]).map(q => ({
+          ...q,
+          customer_name: custMap.get(q.customer_id)?.customer_name || 'ไม่พบข้อมูลลูกค้า'
+        }));
+        LocalDB.saveQuotations(parsed);
+        return parsed;
+      } catch (err) {
+        console.warn('Failed cloud fetch quotations, using fallback', err);
+      }
+    }
     const list = LocalDB.getQuotations();
     const custs = await this.fetchCustomers();
     return list.map(q => {
@@ -1942,13 +2034,13 @@ export const CRMService = {
     const qDate = quote.issue_date || new Date().toISOString().slice(0, 10);
     const yr = qDate.split('-')[0].slice(-2); // e.g. "26"
 
-    let seq = 4001;
+    let seq = 1;
     if (list.length > 0) {
       const seqs = list.map(q => {
         const match = q.quotation_no.match(/^QT-(\d{4})-\d{2}/);
         return match ? parseInt(match[1], 10) : 0;
       });
-      seq = Math.max(...seqs, 4000) + 1;
+      seq = Math.max(...seqs, 0) + 1;
     }
     const nextCode = `QT-${String(seq).padStart(4, '0')}-${yr}`;
     const newId = crypto.randomUUID();
@@ -1962,6 +2054,19 @@ export const CRMService = {
 
     const latest = [prepared, ...list];
     LocalDB.saveQuotations(latest);
+
+    const isCloud = await this.checkCloudConnection();
+    if (isCloud && getConnectivityMode()) {
+      try {
+        const payload = { ...prepared };
+        delete (payload as any).customer;
+        delete (payload as any).customer_name;
+        await apiFetch('/quotations', { method: 'POST', body: JSON.stringify(payload) });
+      } catch (err: any) {
+        console.warn('Cloud insertQuotation failed', err);
+        throw new Error(err.message || 'Supabase Connection Timeout');
+      }
+    }
     return prepared;
   },
 
@@ -1974,14 +2079,39 @@ export const CRMService = {
       return q;
     });
     LocalDB.saveQuotations(updated);
-    const found = updated.find(q => q.id === id);
+    
+    let found = updated.find(q => q.id === id) as Quotation;
     if (!found) throw new Error('Quotation not found');
+
+    const isCloud = await this.checkCloudConnection();
+    if (isCloud && getConnectivityMode()) {
+      try {
+        const payload = { ...updates };
+        delete (payload as any).customer;
+        delete (payload as any).customer_name;
+        await apiFetch(`/quotations?id=eq.${id}`, { method: 'PATCH', body: JSON.stringify(payload) });
+      } catch (err: any) {
+        console.warn('Cloud updateQuotation failed', err);
+        throw new Error(err.message || 'Supabase Connection Timeout');
+      }
+    }
+
     return found;
   },
 
   async deleteQuotation(id: string): Promise<boolean> {
     const list = LocalDB.getQuotations();
     LocalDB.saveQuotations(list.filter(q => q.id !== id));
+    
+    const isCloud = await this.checkCloudConnection();
+    if (isCloud && getConnectivityMode()) {
+      try {
+        await apiFetch(`/quotations?id=eq.${id}`, { method: 'DELETE' });
+      } catch (err: any) {
+        console.warn('Cloud deleteQuotation failed', err);
+        throw new Error(err.message || 'Supabase Connection Timeout');
+      }
+    }
     return true;
   },
 
@@ -2237,6 +2367,89 @@ export const CRMService = {
   async deleteReceipt(id: string): Promise<boolean> {
     const list = LocalDB.getReceipts();
     LocalDB.saveReceipts(list.filter(r => r.id !== id));
+    return true;
+  },
+
+  // -------------------------------------------------------------
+  // PROJECT SERVICES
+  // -------------------------------------------------------------
+  async fetchProjects(): Promise<Project[]> {
+    const list = LocalDB.getProjects();
+    const custs = await this.fetchCustomers();
+    const sos = await this.fetchSalesOrders();
+    const invoices = await this.fetchInvoices();
+    return list.map(p => {
+      const c = custs.find(curr => curr.id === p.customer_id);
+      const so = sos.find(curr => curr.id === p.sales_order_id);
+      
+      // Calculate real invoice and collection status for display
+      const relatedInvoices = invoices.filter(i => i.sales_order_id === p.sales_order_id);
+      let invoiceStatus = 'Not Billed';
+      let collectionStatus = 'Not Collected';
+      
+      if (relatedInvoices.length > 0) {
+        const allPaid = relatedInvoices.every(i => i.status === 'Paid');
+        const anyPaid = relatedInvoices.some(i => i.status === 'Paid' || i.status === 'Partially Paid');
+        invoiceStatus = allPaid ? 'Fully Invoiced' : 'Partially Invoiced';
+        collectionStatus = allPaid ? 'Fully Collected' : (anyPaid ? 'Partially Collected' : 'Not Collected');
+      }
+
+      return {
+        ...p,
+        customer_name: c ? c.customer_name : 'Unknown',
+        sales_order_no: so ? so.so_no : 'Unknown',
+        invoice_status: invoiceStatus,
+        collection_status: collectionStatus,
+      };
+    }).sort((a, b) => b.job_number.localeCompare(a.job_number));
+  },
+
+  async insertProject(payload: Omit<Project, 'id' | 'job_number' | 'created_at' | 'updated_at'>): Promise<Project> {
+    const list = LocalDB.getProjects();
+    const currentYearShort = new Date().getFullYear().toString().substring(2);
+    const matches = list.filter(q => q.job_number.startsWith(`JOB-${currentYearShort}`));
+    let nextSeq = 1;
+    if (matches.length > 0) {
+      const maxSeq = matches.reduce((max, item) => {
+        const seqPart = item.job_number.replace(`JOB-${currentYearShort}`, '');
+        const num = parseInt(seqPart, 10);
+        return num > max ? num : max;
+      }, 0);
+      nextSeq = maxSeq + 1;
+    }
+    const nextCode = `JOB-${currentYearShort}${String(nextSeq).padStart(3, '0')}`;
+    const newId = crypto.randomUUID();
+
+    const prepared: Project = {
+      ...payload,
+      id: newId,
+      job_number: nextCode,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
+
+    const latest = [prepared, ...list];
+    LocalDB.saveProjects(latest);
+    return prepared;
+  },
+
+  async updateProject(id: string, updates: Partial<Project>): Promise<Project> {
+    const list = LocalDB.getProjects();
+    const updated = list.map(p => {
+      if (p.id === id) {
+        return { ...p, ...updates, updated_at: new Date().toISOString() };
+      }
+      return p;
+    });
+    LocalDB.saveProjects(updated);
+    const found = updated.find(p => p.id === id);
+    if (!found) throw new Error('Project not found');
+    return found;
+  },
+
+  async deleteProject(id: string): Promise<boolean> {
+    const list = LocalDB.getProjects();
+    LocalDB.saveProjects(list.filter(p => p.id !== id));
     return true;
   }
 };

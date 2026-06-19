@@ -120,7 +120,7 @@ export default function ExecutiveDashboard({ customers = [], opportunities = [],
         {/* 3. SALES ANALYTICS & 4. ANNUAL SALES TREND */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <ChartCard title="Monthly Sales Analytics (Actual vs Target)">
-             <ResponsiveContainer width="100%" height={300}>
+             <ResponsiveContainer width="100%" height={300} minHeight={1} minWidth={1}>
               <ComposedChart data={mockMonthlySales}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
                 <XAxis dataKey="name" axisLine={false} tickLine={false} className="text-xs" />

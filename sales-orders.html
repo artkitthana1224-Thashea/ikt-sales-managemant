@@ -47,6 +47,8 @@
       background-color: #fff;
       color: #333;
       box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+      max-width: 210mm;
+      margin: 0 auto;
     }
   </style>
 </head>
@@ -213,7 +215,7 @@
             </div>
 
             <!-- Table of Items -->
-            <table class="table table-bordered table-striped align-middle small my-3">
+            <table class="table table-bordered border-dark table-striped align-middle small my-3" style="table-layout: fixed; width: 100%;">
               <thead class="table-dark">
                 <tr>
                   <th>รายละเอียดงาน / บริการ</th>
@@ -445,7 +447,7 @@
 
         itemsBody.insertAdjacentHTML('beforeend', `
           <tr>
-            <td>${descText}</td>
+            <td style="word-break: break-word; white-space: pre-wrap;">${descText}</td>
             <td class="text-center font-monospace">${qty}</td>
             <td class="text-end font-monospace">${price.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
             <td class="text-end font-monospace">${total.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
